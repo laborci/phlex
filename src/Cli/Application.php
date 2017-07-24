@@ -16,6 +16,7 @@ class Application extends \Symfony\Component\Console\Application {
 		$application->add(new CreateEntity());
 		$application->add(new UpdateEntityModel());
 		$application->add(new UpdateEntityDocBlock());
+		$application->add(new Configure());
 
 		$application->run();
 	}

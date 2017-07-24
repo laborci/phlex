@@ -23,30 +23,6 @@ class CreateEntity extends Command{
 		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'.php')) file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'.php', $this->getEntityClass($name));
 		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Repository.php')) file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Repository.php', $this->getRepositoryClass($name));
 		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Model.php')) file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Model.php', $this->getModelClass($name));
-
-		/*$class = User::class;
-
-		$ref = new \ReflectionClass($class);
-
-		$docblock = $ref->getDocComment();
-		print_r($this->parseBlock($docblock));
-
-		$output->writeln($ref->getDocComment());
-		$output->writeln($ref->getFileName());
-		$methods = $ref->getMethods();
-
-		foreach($methods as $method){
-			if(substr($method->name,0,5) == '__get'){
-				$output->writeln($method->getDocComment());
-			}
-		}
-
-		$model = $class::model();
-		$fields = $model->getFields();
-		print_r($fields);
-
-		$output->writeln('Done...');
-		*/
 	}
 
 	protected function parseBlock($docblock){
