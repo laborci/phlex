@@ -1,0 +1,27 @@
+{
+    "name": "laborci/phlex",
+    "description": "Phlex framework - work in progress, not for production",
+    "keywords": [],
+    "license" : "MIT",
+    "authors" : [
+        {
+            "name": "Gergely Laborci",
+            "email": "gergely@laborci.hu"
+        }
+    ],
+    "require": {
+        "symfony/console": "^3.1",
+        "symfony/http-foundation": "^3.1",
+        "vlucas/phpdotenv": "^2.4",
+        "league/flysystem": "^1.0",
+        "psr/log": "^1.0",
+        "hackzilla/password-generator": "^1.3",
+        "vria/nodiacritic": "^0.1.2",
+        "nabil1337/case-helper": "^0.1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Phlex\\": "src/"
+        }
+    }
+}
