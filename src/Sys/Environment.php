@@ -41,6 +41,8 @@ abstract class Environment {
 
 		$this->config['path_root'] = getenv('ROOT') . '/';
 
+		trigger_error('***'.$this->config['path_root']);
+
 		$this->config['path_var'] = $this->path_root . 'var/';
 		$this->config['path_config'] = $this->path_root . 'config/';
 		$this->config['path_caches'] = $this->path_var . 'caches/';
@@ -56,11 +58,17 @@ abstract class Environment {
 
 
 	protected function __construct() {
-		putenv('ROOT='.realpath(__DIR__.'/../..'));
-		$this->setPaths();
+
+		$root = getenv('ROOT');
 		$cfg = getenv('PXCONFIG');
+
+		if(!$root){
+			throw new \Exception('ROOT env is not set');
+		}
+
+		$this->setPaths();
 		if(!$cfg)$cfg = 'config.php';
-		$this->config = array_merge($this->config, include __DIR__.'/../../config/'.$cfg);
+		$this->config = array_merge($this->config, include $root.'/config/'.$cfg);
 		$this->initialize();
 	}
 
