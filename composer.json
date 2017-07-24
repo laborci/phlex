@@ -19,5 +19,7 @@
         "psr-4": {
             "Phlex\\": "src/"
         }
-    }
+    },
+    "bin": ["bin/phlex-install"]
+
 }
