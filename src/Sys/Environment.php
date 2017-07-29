@@ -41,8 +41,6 @@ abstract class Environment {
 
 		$this->config['path_root'] = getenv('ROOT') . '/';
 
-		trigger_error('***'.$this->config['path_root']);
-
 		$this->config['path_var'] = $this->path_root . 'var/';
 		$this->config['path_config'] = $this->path_root . 'config/';
 		$this->config['path_caches'] = $this->path_var . 'caches/';

@@ -39,9 +39,9 @@ class CreateEntity extends Command{
 		return "<?php namespace App\\Entity\\".$name.";
 
 /**
- * @method static \\App\\Entity\\".$name."\\".$name."Repository repository()
- * @method static \\App\\Entity\\".$name."\\".$name."Model model()
- * @property-read integer                       \$id
+ * px: @method static \\App\\Entity\\".$name."\\".$name."Repository repository()
+ * px: @method static \\App\\Entity\\".$name."\\".$name."Model model()
+ * px: @property-read integer                       \$id
  */
 
 class ".$name." extends \\Phlex\\RedFox\\Entity{
@@ -69,7 +69,6 @@ class ".$name."Repository extends \\Phlex\\RedFox\\Repository {
 class ".$name."Model extends \\Phlex\\RedFox\\Model{
 
 	protected function fields(){
-		\$this->addField('id', new \\Phlex\\RedFox\\Fields\\IdField());
 	}
 	
 	protected function decorateFields(){}

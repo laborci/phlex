@@ -51,7 +51,19 @@ abstract class Entity {
 
 	public function isExists(){ return (bool)$this->record->get('id'); }
 	public function isDeleted(){ return $this->deleted; }
-	public function save(){ static::repository()->save($this); }
+	public function save(){
+		if($this->isExists()){
+			if($this->onBeforeUpdate() === false) return false;
+			static::repository()->update($this);
+			$this->onUpdate();
+		}else{
+			if($this->onBeforeInsert() === false) return false;
+			$id = static::repository()->insert($this);
+			$this->id = $id;
+			$this->onInsert();
+		}
+		return $this->id;
+	}
 	public function getRawData(){ return $this->record->getRawData(); }
 
 

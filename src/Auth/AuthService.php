@@ -20,10 +20,15 @@ abstract class AuthService implements InjectDependencies {
 	}
 
 	public function isAuthenticated(): bool { return $this->container->hasUserId(); }
+
 	public function logout(){ $this->container->forget(); }
 
 	public function authenticate($login, $password): bool {
-		$user = $this->findUser($login);
+		try{
+			$user = $this->findUser($login);
+		}catch (\Exception $e){
+			return false;
+		}
 		if($user->checkPassword($password)){
 			$this->container->setUserId($user->getId());
 			return true;

@@ -27,9 +27,9 @@ abstract class SmartPageResponder extends TRexPageResponder implements SmartPage
 	public function addCssInclude($src) {
 		if (!in_array($src, $this->loadedExtensions)) {
 			if (!is_null($this->headerExtensions)) {
-				$this->headerExtensions['js-' . $src] = '<link rel="stylesheet" type="text/css" href="' . $src . '" />';
+				$this->headerExtensions['css-' . $src] = '<link rel="stylesheet" type="text/css" href="' . $src . '" />';
 			} else {
-				$this->dependecyExtensions['js-' . $src] = '<link rel="stylesheet" type="text/css" href="' . $src . '" />';
+				$this->dependecyExtensions['css-' . $src] = '<link rel="stylesheet" type="text/css" href="' . $src . '" />';
 			}
 			$this->loadedExtensions[] = $src;
 		}

@@ -20,10 +20,14 @@ class UpdateEntityModel extends Command{
 		$name = $input->getArgument('name');
 		$class = "\\App\\Entity\\".$name."\\".$name;
 
-		/** @var \Phlex\RedFox\Repository $repository */
-		$repository = $class::repository();
-		/** @var \Phlex\RedFox\Model $model */
-		$model = $class::model();
+		try {
+			/** @var \Phlex\RedFox\Repository $repository */
+			$repository = $class::repository();
+			/** @var \Phlex\RedFox\Model $model */
+			$model = $class::model();
+		}catch (\Exception $exception){
+			print_r($exception);
+		}
 		/**  */
 		$table =  $repository->getDataSource()->getTable();
 		$access = $repository->getDataSource()->getAccess();

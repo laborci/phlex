@@ -31,7 +31,8 @@ class Repository {
 	 * @return Cache
 	 */
 	protected function getCache() {
-		return $this->entityClass::cache();
+		$class = $this->entityClass;
+		return $class::cache();
 	}
 
 	public function pick(int $id) {
@@ -60,29 +61,15 @@ class Repository {
 		return $objects;
 	}
 
-	public function save(Entity $object) {
-		if(!$object->isExists()) {
-			return $this->insert($object);
-		} else {
-			return $this->update($object);
-		}
-	}
-
-	protected function insert(Entity $object) {
-		if($object->onBeforeInsert() === false) return false;
+	public function insert(Entity $object) {
 		$data = $object->getRawData();
 		$id = $this->source->insert($data);
-		$object->id = $id;
-		$object->onInsert();
 		return $id;
 	}
 
-	protected function update(Entity $object) {
-		if($object->onBeforeUpdate() === false) return false;
+	public function update(Entity $object) {
 		$data = $object->getRawData();
 		$this->source->update($data['id'], $data);
-		$object->onUpdate();
-		return true;
 	}
 
 	/**
@@ -117,6 +104,13 @@ class Repository {
 		if(!is_null($filter))
 			$request->where($filter);
 		return $request;
+	}
+
+	protected function throwExceptionOnEmpty($items){
+		if(is_null($items) || (is_array($items) && !count($items))){
+			throw new EmptyResultException();
+		}
+		return $items;
 	}
 
 }
