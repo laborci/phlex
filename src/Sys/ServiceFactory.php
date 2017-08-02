@@ -1,7 +1,5 @@
 <?php namespace Phlex\Sys;
 
-use App\Env;
-
 class ServiceFactory{
 
 	protected $name;
@@ -52,7 +50,7 @@ class ServiceFactory{
 					if(!is_null($constructor)) {
 						$parameters = $constructor->getParameters();
 						foreach ($parameters as $parameter) {
-							$arguments[] = Env::instance()->getService($parameter->getType()->getName());
+							$arguments[] = ServiceManager::get($parameter->getType()->getName());
 						}
 					}
 					$service = new $class(...$arguments);

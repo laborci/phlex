@@ -1,6 +1,6 @@
 <?php namespace Phlex\Database;
 
-use App\Env;
+use Phlex\Sys\ServiceManager;
 
 class DataSource{
 
@@ -17,7 +17,7 @@ class DataSource{
 	public function getTable() { return $this->table; }
 
 	public function __construct($table, $database = 'database') {
-		$this->access = Env::get('database');
+		$this->access = ServiceManager::get('database');
 		$this->table = $table;
 	}
 

@@ -1,8 +1,7 @@
 <?php namespace Phlex\Database;
 
 use PDO;
-use PDOException;
-use Phlex\Sys\Log;
+use Phlex\Sys\ServiceManager;
 use Psr\Log\LoggerInterface;
 
 
@@ -21,11 +20,10 @@ class Access {
 	 * Access constructor.
 	 * Creates a new DB handler to the specified database
 	 * @param $connectionUrl
-	 * @param $logger
 	 */
-	public function __construct($connectionUrl, LoggerInterface $logger = null) {
+	public function __construct($connectionUrl) {
 
-		$this->logger = $logger;
+		$this->logger = ServiceManager::get(LoggerInterface::class);
 
 		$url = parse_url($connectionUrl);
 		parse_str($url['query'], $options);

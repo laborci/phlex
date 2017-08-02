@@ -11,7 +11,7 @@ namespace Phlex\Auth;
 
 use Phlex\Sys\InjectDependencies;
 
-abstract class AuthService implements InjectDependencies {
+abstract class AuthService implements InjectDependencies, AuthServiceInterface {
 
 	protected $container;
 

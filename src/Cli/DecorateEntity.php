@@ -75,7 +75,7 @@ class DecorateEntity extends Command{
 		$source = str_replace($doc, $newBlock, $source);
 
 		file_put_contents($ref->getFileName(), $source);
-		$output->writeln('<info>💾  '.substr($ref->getFileName(), strlen(Env::instance()->path_root)).'</info>');
+		$output->writeln('<info>💾  '.substr($ref->getFileName(), strlen(Env::get('path_root'))).'</info>');
 
 	}
 

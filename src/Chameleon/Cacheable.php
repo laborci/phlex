@@ -5,6 +5,7 @@ namespace Phlex\Chameleon;
 
 use App\Env;
 use Phlex\RedFox\Cache;
+use Phlex\Sys\ServiceManager;
 
 
 trait Cacheable {
@@ -15,7 +16,7 @@ trait Cacheable {
 
 	public function __invoke() {
 		/** @var \Phlex\Sys\FileCache $cache */
-		$cache = Env::get('cache.response');
+		$cache = ServiceManager::get('cache.response');
 		$key = $this->getCacheKey();
 		$this->beforeCacheHandler();
 
@@ -39,14 +40,14 @@ trait Cacheable {
 
 	protected function isCacheValid($key): bool {
 		/** @var \Phlex\Sys\FileCache $cache */
-		$cache = Env::get('cache.response');
+		$cache = ServiceManager::get('cache.response');
 		$cacheInvalidationTime = $this->getCacheInvalidationTime();
 		return $cacheInvalidationTime == 0 || time() < ($cache->getTime($key) + $cacheInvalidationTime);
 	}
 
 	protected function invalidateCache(){
 		/** @var \Phlex\Sys\FileCache $cache */
-		$cache = Env::get('cache.response');
+		$cache = ServiceManager::get('cache.response');
 		$key = $this->getCacheKey();
 		$cache->delete($key);
 	}

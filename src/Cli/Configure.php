@@ -48,6 +48,7 @@ class Configure extends Command{
 		$random = md5(time());
 
 		$configPhp = file_get_contents(__DIR__.'/../../templates/config/config.template');
+		$configPhp = str_replace('{{domain}}', $domain, $configPhp);
 		$configPhp = str_replace('{{dbuser}}', $dbuser, $configPhp);
 		$configPhp = str_replace('{{dbpass}}', $dbpass, $configPhp);
 		$configPhp = str_replace('{{dbhost}}', $dbhost, $configPhp);

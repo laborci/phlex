@@ -138,7 +138,7 @@ class Thumbnail {
 		}
 
 		$url = $this->file->getFilename() . '.' . $op . '.' . $this->file->pathId;
-		$url = Env::instance()->url_thumbnails.$url.'.' . base_convert(crc32($url . '.' . $ext . Env::instance()->thumbnailCrc32Salt), 10, 32) . '.' . $ext;
+		$url = Env::get('url_thumbnails').$url.'.' . base_convert(crc32($url . '.' . $ext . Env::instance()->thumbnailCrc32Salt), 10, 32) . '.' . $ext;
 
 		return $url;
 	}

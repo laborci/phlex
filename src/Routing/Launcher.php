@@ -1,6 +1,8 @@
 <?php namespace Phlex\Routing;
 
-use App\Env;
+use Phlex\Sys\ServiceManager;
+use Psr\Log\LoggerInterface;
+
 
 class Launcher {
 
@@ -19,14 +21,15 @@ class Launcher {
 
 	public static function launch(...$sites) {
 
-		$logger = \App\Env::get('RequestLog');
 		$launcher = new static(...$sites);
 		/** @var Request $request */
 		$request = Request::createFromGlobals();
-		if($logger) {
-			$logger->info($request->getRequestUri(), ['method'=>$request->getMethod()]);
-		}
-		Env::bind('Request')->value($request);
+
+		/** @var \Psr\Log\LoggerInterface $logger */
+		$logger = ServiceManager::get(LoggerInterface::class);
+		$logger->info($request->getHost().$request->getRequestUri(), ['method'=>$request->getMethod()]);
+
+		ServiceManager::bind('Request')->value($request);
 		$launcher($request);
 	}
 

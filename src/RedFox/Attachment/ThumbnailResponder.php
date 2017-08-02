@@ -27,13 +27,13 @@ class ThumbnailResponder extends PageResponder {
 		if($ext == 'jpg'){ $jpegquality = array_pop($parts); }else{$jpegquality = null;}
 		$op = array_pop($parts);
 		$file = join('.', $parts);
-		$path = Env::instance()->path_files.preg_replace("/-/",'/',$pathId,2).'/'.$file;
+		$path = Env::get('path_files').preg_replace("/-/",'/',$pathId,2).'/'.$file;
 
 		$url = $file . '.' . $op . (($jpegquality)?('.'.$jpegquality):('')).'.' . $pathId.'.' . $ext;
-		$newHash = base_convert(crc32($url . Env::instance()->thumbnailCrc32Salt), 10, 32);
+		$newHash = base_convert(crc32($url . Env::get('thumbnailCrc32Salt')), 10, 32);
 
-		if(!is_dir(Env::instance()->path_thumbnails)) mkdir(Env::instance()->path_thumbnails);
-		$this->target = Env::instance()->path_thumbnails.$uri;
+		if(!is_dir(Env::get('path_thumbnails'))) mkdir(Env::get('path_thumbnails'));
+		$this->target = Env::get('path_thumbnails').$uri;
 		$this->source = $path;
 		$this->ext = $ext;
 

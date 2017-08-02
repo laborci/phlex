@@ -1,8 +1,9 @@
 <?php namespace Phlex\Routing;
 
-use App\Env;
 use Phlex\Chameleon\Middleware;
 use Phlex\Chameleon\PageResponder;
+use Phlex\Sys\ServiceManager;
+
 
 final class Handler {
 
@@ -93,11 +94,11 @@ final class Handler {
 
 
 	private function createMiddleware($middlewareClass): Middleware {
-		return Env::get($middlewareClass);
+		return ServiceManager::get($middlewareClass);
 	}
 
 	private function createResponder($responderClass): PageResponder {
-		return Env::get($responderClass);
+		return ServiceManager::get($responderClass);
 	}
 
 }

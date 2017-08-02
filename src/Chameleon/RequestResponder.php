@@ -1,16 +1,7 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: elvis
- * Date: 2017. 07. 11.
- * Time: 10:50
- */
+<?php namespace Phlex\Chameleon;
 
-namespace Phlex\Chameleon;
-
-
-use App\Env;
 use Phlex\Routing\Request;
+use Phlex\Sys\ServiceManager;
 use Symfony\Component\HttpFoundation\FileBag;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -22,7 +13,7 @@ abstract class RequestResponder extends Responder{
 	private $request;
 
 	public function __construct() {
-		$this->request = Env::get('Request');
+		$this->request = ServiceManager::get('Request');
 	}
 
 	protected function getRequest(): Request { return $this->request; }

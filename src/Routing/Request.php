@@ -14,8 +14,9 @@ class Request extends \Symfony\Component\HttpFoundation\Request {
 		$this->pathParams = new ParameterBag();
 	}
 
-	public function fnMatchHost($pattern) {
-		return fnmatch($pattern, $this->getHost());
+	public function fnMatchHost(...$patterns) {
+		foreach ($patterns as $pattern) if (fnmatch($pattern, $this->getHost())) return true;
+		return false;
 	}
 
 	public function isMethod($method) {

@@ -42,9 +42,9 @@ class AttachmentManager{
 	public function __construct(Entity $owner, AttachmentDescriptor $descriptor) {
 		$this->owner = $owner;
 		$this->descriptor = $descriptor;
-		$this->path = Env::instance()->path_files . $descriptor->getEntityShortName() . '/' . $owner->id. '/'.$descriptor->getName().'/';
+		$this->path = Env::get('path_files') . $descriptor->getEntityShortName() . '/' . $owner->id. '/'.$descriptor->getName().'/';
 		$this->pathId = $descriptor->getEntityShortName().'-'.$owner->id.'-'.$descriptor->getName();
-		$this->urlBase = Env::instance()->url_files.$descriptor->getEntityShortName() . '/' . $owner->id. '/'.$descriptor->getName().'/';
+		$this->urlBase = Env::get('url_files').$descriptor->getEntityShortName() . '/' . $owner->id. '/'.$descriptor->getName().'/';
 		if(!is_dir($this->path)){ mkdir($this->path, 0777, true); }
 	}
 

@@ -19,23 +19,23 @@ class CreateEntity extends Command{
 	protected function execute(InputInterface $input, OutputInterface $output) {
 
 		$name = $input->getArgument('name');
-		$dir = Env::instance()->path_root.'App/Entity/'.$name;
+		$dir = Env::get('path_root').'App/Entity/'.$name;
 		@mkdir($dir);
 
-		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'.php')){
-			file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'.php', $this->getEntityClass($name));
+		if(!file_exists($dir.'/'.$name.'.php')){
+			file_put_contents($dir.'/'.$name.'.php', $this->getEntityClass($name));
 			$output->writeln('<info>💾  '.'App/Entity/'.$name.'/'.$name.'.php'.'</info>');
 		}
-		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Repository.php')){
-			file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Repository.php', $this->getRepositoryClass($name));
+		if(!file_exists($dir.'/'.$name.'Repository.php')){
+			file_put_contents($dir.'/'.$name.'Repository.php', $this->getRepositoryClass($name));
 			$output->writeln('<info>💾  '.'App/Entity/'.$name.'/'.$name.'Repository.php'.'</info>');
 		}
-		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Model.php')){
-			file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Model.php', $this->getModelClass($name));
+		if(!file_exists($dir.'/'.$name.'Model.php')){
+			file_put_contents($dir.'/'.$name.'Model.php', $this->getModelClass($name));
 			$output->writeln('<info>💾  '.'App/Entity/'.$name.'/'.$name.'Model.php'.'</info>');
 		}
-		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'DataSource.php')){
-			file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'DataSource.php', $this->getDataSourceClass($name));
+		if(!file_exists($dir.'/'.$name.'DataSource.php')){
+			file_put_contents($dir.'/'.$name.'DataSource.php', $this->getDataSourceClass($name));
 			$output->writeln('<info>💾  '.'App/Entity/'.$name.'/'.$name.'DataSource.php'.'</info>');
 		}
 		$output->writeln('done.');

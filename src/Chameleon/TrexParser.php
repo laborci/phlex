@@ -1,8 +1,9 @@
 <?php namespace Phlex\Chameleon;
 
 
-use Phlex\Parser\TRex;
 use App\Env;
+use Phlex\Parser\TRex;
+use Phlex\Sys\ServiceManager;
 
 
 trait TrexParser {
@@ -10,7 +11,7 @@ trait TrexParser {
 	final protected function respondTemplate($method = 'template') {
 
 		$key = str_replace('\\', '_', get_class($this)) . '-' . $method;
-		$templateCache = Env::get('cache.template');
+		$templateCache = ServiceManager::get('cache.template');
 
 		if (!$templateCache->exists($key) || $this->isDevAndDirty($key)) {
 			//trigger_error('template_caching: '.$key);
@@ -26,9 +27,9 @@ trait TrexParser {
 
 	final protected function isDevAndDirty($key) {
 
-		if(!Env::instance()->devmode) return false;
+		if(!Env::get('dev-mode')) return false;
 
-		$templateCache = Env::get('cache.template');
+		$templateCache = ServiceManager::get('cache.template');
 
 		$time = 0;
 		$classes = class_parents($this);

@@ -1,18 +1,19 @@
 <?php namespace Phlex\Chameleon;
 
-use App\Env;
 use Phlex\Routing\Request;
+use Phlex\Sys\ServiceManager;
 use Symfony\Component\HttpFoundation\FileBag;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\ServerBag;
+
 
 abstract class Responder{
 
 	/** @var \Phlex\Routing\Request  */
 	private $request;
 
-	public function __construct() { $this->request = Env::get('Request'); }
+	public function __construct() { $this->request = ServiceManager::get('Request'); }
 
 	protected function getRequest(): Request { return $this->request; }
 	protected function getRequestBag(): ParameterBag { return $this->getRequest()->request; }

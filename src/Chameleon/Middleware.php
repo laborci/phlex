@@ -1,6 +1,7 @@
 <?php namespace Phlex\Chameleon;
 
-use App\Env;
+use Phlex\Sys\ServiceManager;
+
 
 abstract class Middleware extends Responder {
 
@@ -10,7 +11,7 @@ abstract class Middleware extends Responder {
 		$request = $this->getRequest();
 		$request->attributes->replace($attributes);
 		/** @var PageResponder $responder */
-		$responder = Env::get($responderClass);
+		$responder = ServiceManager::get($responderClass);
 		$responder();
 		die();
 	}

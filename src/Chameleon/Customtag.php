@@ -1,7 +1,6 @@
 <?php namespace Phlex\Chameleon;
 
-
-use App\Env;
+use Phlex\Sys\ServiceManager;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 
@@ -45,7 +44,7 @@ abstract class Customtag implements SmartPageComponentInterface {
 
 	final public static function show($data, $parent = null) {
 		/** @var static $tag */
-		$tag = Env::get(get_called_class());
+		$tag = ServiceManager::get(get_called_class());
 		$tag->setup(new ParameterBag($data), $parent);
 		$tag();
 	}

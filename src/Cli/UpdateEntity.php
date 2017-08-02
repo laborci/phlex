@@ -101,7 +101,7 @@ class UpdateEntity extends Command{
 			array_splice($source, $start, $end - $start, $body);
 
 			file_put_contents($ref->getFileName(), join('', $source));
-			$output->writeln('<info>💾  '.substr($ref->getFileName(), strlen(Env::instance()->path_root)).'</info>');
+			$output->writeln('<info>💾  '.substr($ref->getFileName(), strlen(Env::get('path_root'))).'</info>');
 		}
 		$output->writeln("Decorating model...");
 		exec("./phlex px:decorate-entity ".$name, $lines);
