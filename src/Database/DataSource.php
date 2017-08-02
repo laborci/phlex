@@ -6,6 +6,7 @@ class DataSource{
 
 	/** @var  Access */
 	protected $access;
+
 	/** @var string */
 	protected $table;
 

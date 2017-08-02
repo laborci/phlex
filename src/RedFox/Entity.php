@@ -19,8 +19,9 @@ abstract class Entity {
 	public static function repository(){
 		static $repository;
 		if(is_null($repository)){
-			$class = get_called_class().'Repository';
-			$repository = new $class();
+			$dataSourceClass = get_called_class().'DataSource';
+			$repositoryClass = get_called_class().'Repository';
+			$repository = new $repositoryClass(new $dataSourceClass, get_called_class());
 		}
 		return $repository;
 	}

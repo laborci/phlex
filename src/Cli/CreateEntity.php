@@ -1,6 +1,7 @@
 <?php namespace Phlex\Cli;
 
 use App\Env;
+use CaseHelper\CaseHelperFactory;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,6 +21,7 @@ class CreateEntity extends Command{
 		$name = $input->getArgument('name');
 		$dir = Env::instance()->path_root.'App/Entity/'.$name;
 		@mkdir($dir);
+
 		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'.php')){
 			file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'.php', $this->getEntityClass($name));
 			$output->writeln('<info>💾  '.'App/Entity/'.$name.'/'.$name.'.php'.'</info>');
@@ -31,6 +33,10 @@ class CreateEntity extends Command{
 		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Model.php')){
 			file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Model.php', $this->getModelClass($name));
 			$output->writeln('<info>💾  '.'App/Entity/'.$name.'/'.$name.'Model.php'.'</info>');
+		}
+		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'DataSource.php')){
+			file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'DataSource.php', $this->getDataSourceClass($name));
+			$output->writeln('<info>💾  '.'App/Entity/'.$name.'/'.$name.'DataSource.php'.'</info>');
 		}
 		$output->writeln('done.');
 		$output->writeln('Run command: <info>phlex px:update-entity '.$name.'</info>');
@@ -47,53 +53,27 @@ class CreateEntity extends Command{
 	}
 
 	protected function getEntityClass($name){
-
-		return str_replace('{{name}}', $name, file_get_contents(__DIR__.'/../../templates/entity/entity.php'));
-
-		return "<?php namespace App\\Entity\\".$name.";
-
-/**
- * px: @method static \\App\\Entity\\".$name."\\".$name."Repository repository()
- * px: @method static \\App\\Entity\\".$name."\\".$name."Model model()
- * px: @property-read integer                       \$id
- */
-
-class ".$name." extends \\Phlex\\RedFox\\Entity{
-
-}
-";
+		$class = file_get_contents(__DIR__.'/../../templates/entity/entity.template');
+		$class = str_replace('{{name}}', $name, $class);
+		return $class;
 	}
 
 	protected function getRepositoryClass($name){
-		return str_replace('{{name}}', $name, file_get_contents(__DIR__.'/../../templates/entity/repository.php'));
-
-		return "<?php namespace App\\Entity\\".$name.";
-
-/**
- * @method \\App\\Entity\\".$name."\\".$name." pick(int \$id)
- * @method \\App\\Entity\\".$name."\\".$name."[] collect(array \$id_list)
- */
-
-class ".$name."Repository extends \\Phlex\\RedFox\\Repository {
-
-}";
+		$class = file_get_contents(__DIR__.'/../../templates/entity/repository.template');
+		$class = str_replace('{{name}}', $name, $class);
+		return $class;
+	}
+	protected function getDataSourceClass($name){
+		$table = CaseHelperFactory::make(CaseHelperFactory::INPUT_TYPE_CAMEL_CASE)->toSnakeCase($name);
+		$class = file_get_contents(__DIR__.'/../../templates/entity/dataSource.template');
+		$class = str_replace('{{name}}', $name, $class);
+		$class = str_replace('{{table}}', $table, $class);
+		return $class;
 	}
 
 	protected function getModelClass($name){
-		return str_replace('{{name}}', $name, file_get_contents(__DIR__.'/../../templates/entity/model.php'));
-
-		return "<?php namespace App\\Entity\\".$name.";
-
-class ".$name."Model extends \\Phlex\\RedFox\\Model{
-
-	protected function fields(){
-	}
-	
-	protected function decorateFields(){}
-	protected function relations(){}
-	protected function attachments(){}
-
-}";
-	}
+		$class = file_get_contents(__DIR__.'/../../templates/entity/model.template');
+		$class = str_replace('{{name}}', $name, $class);
+		return $class;	}
 
 }

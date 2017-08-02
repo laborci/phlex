@@ -5,27 +5,23 @@ use Phlex\Database\DataSource;
 use Phlex\Database\Filter;
 use Phlex\Database\Request;
 
-class Repository {
+abstract class Repository {
 
-	protected $table = null;
-	protected $dbName;
+	/** @var \Phlex\Database\DataSource  */
 	protected $source;
 	protected $entityClass;
 
-	public function __construct() {
-		if(is_null($this->entityClass)) {
-			$reflect = new \ReflectionClass($this);
-			$this->entityClass = substr($reflect->getName(), 0, -10);
-		}
-		if(is_null($this->table)) {
-			$reflect = new \ReflectionClass($this->entityClass);
-			$class = $reflect->getShortName();
-			$this->table = CaseHelperFactory::make(CaseHelperFactory::INPUT_TYPE_CAMEL_CASE)->toSnakeCase($class);
-		}
-		$this->source = new DataSource($this->table, $this->dbName);
+	public function __construct($source, $entityClass) {
+		$this->entityClass = $entityClass;
+		$this->source = $source;
 	}
 
-	public function getDataSource(){ return $this->source; }
+	/**
+	 * Creates the default DataSource for the entity.
+	 * @return \Phlex\Database\DataSource
+	 */
+
+	public function getDataSource():DataSource{ return $this->source; }
 
 	/**
 	 * @return Cache

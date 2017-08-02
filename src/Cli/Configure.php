@@ -20,7 +20,7 @@ class Configure extends Command{
 		$question = new Question('Application domain (yourawesome.com) :', 'yourawesome.com');
 		$domain = $helper->ask($input, $output, $question);
 
-		$localConf = file_get_contents(__DIR__.'/../../templates/config/local.conf');
+		$localConf = file_get_contents(__DIR__.'/../../templates/config/local.conf.template');
 		$localConf = str_replace('{{domain}}', $domain, $localConf);
 		$localConf = str_replace('{{path}}', $root, $localConf);
 		file_put_contents($root.'/config/local.conf', $localConf);
@@ -47,7 +47,7 @@ class Configure extends Command{
 
 		$random = md5(time());
 
-		$configPhp = file_get_contents(__DIR__.'/../../templates/config/config.php');
+		$configPhp = file_get_contents(__DIR__.'/../../templates/config/config.template');
 		$configPhp = str_replace('{{dbuser}}', $dbuser, $configPhp);
 		$configPhp = str_replace('{{dbpass}}', $dbpass, $configPhp);
 		$configPhp = str_replace('{{dbhost}}', $dbhost, $configPhp);
