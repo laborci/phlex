@@ -2,74 +2,48 @@
 
 use PDO;
 use PDOException;
-use Phlex\Sys\Dbg;
+use Phlex\Sys\Log;
+use Psr\Log\LoggerInterface;
+
 
 class Access {
 
-	/** @var array */
-	protected $dbServerData;
 	/** @var \PDO */
-	public $db;
+	private $connection;
+
 	/** @var string */
-	public $charSet;
-	/** @var bool */
-	public static $debug = false;
+	private $database;
 
-
-	public function getDatabaseName() {
-		return $this->dbServerData['database'];
-	}
+	/** @var  Log */
+	private $logger;
 
 	/**
+	 * Access constructor.
 	 * Creates a new DB handler to the specified database
-	 *
-	 * @param array|string  $dbServerData keys: user; password; server; database; name; connectionString
-	 * @param string $charSet      charset of the DB connection
+	 * @param $connectionUrl
+	 * @param $logger
 	 */
-	public function __construct($dbServerData) {
-		if(is_string($dbServerData)){
-			$url = parse_url($dbServerData);
-			$dbServerData = [
-					'host'     => $url['host'],
-					'dbname'   => trim($url['path'],'/'),
-					'user'     => $url['user'],
-					'password' => $url['pass'],
-					'port'     => $url['port'],
-			];
+	public function __construct($connectionUrl, LoggerInterface $logger = null) {
 
-			parse_str($url['query'], $options);
-			$dbServerData['charset'] = array_key_exists('charset',$options) ? $options['charset'] : 'utf-8';
-		}
+		$this->logger = $logger;
 
-		$this->charSet = $dbServerData['charset'];
-		$this->dbServerData = $dbServerData;
-		$this->connect();
-	}
+		$url = parse_url($connectionUrl);
+		parse_str($url['query'], $options);
 
-	/**
-	 * Establishes the connection (creates PDO instance).
-	 * Debug::send('DB Error', ...) called if error occures.
-	 *
-	 * @return boolean true on success, false on error
-	 */
-	protected function connect() {
-		try {
-			$this->db = new PDO(
-				'mysql:host=' . $this->dbServerData['host'] . ';dbname=' . $this->dbServerData['dbname'] . ';charset=' . $this->charSet,
-				$this->dbServerData['user'],
-				$this->dbServerData['password'],
-				array(
-					PDO::ATTR_PERSISTENT => true
-				)
-			);
-			$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-			$this->db->prepare("SET CHARACTER SET ?")->execute(array($this->charSet));
-			//$this->db->prepare("SET NAME ?")->execute(array($this->charSet)); UNKNOWN SYSTEM VARIABLE 'NAME' ERRNO: HY000
-			return true;
-		} catch(PDOException $ex) {
-			Dbg::send(array('errno' => $ex->getCode(), 'message' => $ex->getMessage(), 'trace' => $ex->getTrace()), 'DB Error');
-			return false;
-		}
+		$host     = $url['host'];
+		$database = trim($url['path'],'/');
+		$user     = $url['user'];
+		$password = $url['pass'];
+		$port     = $url['port'];
+		$charset  = array_key_exists('charset',$options) ? $options['charset'] : 'utf-8';
+
+		$this->database = $database;
+
+		$dsn = 'mysql:host='.$host.';dbname='.$database.';port='.$port.';charset='.$charset;
+
+		$this->connection = new PDO($dsn, $user, $password, [PDO::ATTR_PERSISTENT => true]);
+		$this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$this->connection->prepare("SET CHARACTER SET ?")->execute(array($charset));
 	}
 
 
@@ -81,15 +55,9 @@ class Access {
 	 * @return \PDOStatement|boolean result set as PDOStatement (if any) or false
 	 * @throws \Phlex\Database\Exception
 	 */
-	private function runCommand($sql, $method = 'runCommand') {
-		if(self::$debug === true) Dbg::send($sql, 'SQL', get_called_class());
-		//trigger_error($method . ': ' . $sql, E_USER_NOTICE);
-		try {
-			$result = $this->db->query($sql, PDO::FETCH_ASSOC);
-		} catch(PDOException $ex) {
-			throw new \Phlex\Database\Exception($ex->getMessage(), $ex->getCode(), null, $sql, $ex);
-		}
-
+	private function runCommand($sql, $method) {
+		if(!is_null($this->logger)) $this->logger->debug($sql, ['method'=> $method]);
+		$result = $this->connection->query($sql, PDO::FETCH_ASSOC);
 		return $result ? $result : false;
 	}
 
@@ -273,7 +241,7 @@ class Access {
 
 		$sql = 'INSERT ' . ($isIgnore === true ? 'IGNORE' : '') . ' INTO ' . $table . ' (' . implode(',', $this->escapeSQLEntities($fields)) . ') VALUES ' . implode(', ', $valueMatrix);
 		if(!$result = $this->runCommand($sql, 'insert ignore')) return false;
-		$id = (int)$this->db->lastInsertId();   // the important comment is above at insert method... some sources say when INSERT IGNORE does not insert any row lastInsertId gives still the next id... donno.
+		$id = (int)$this->connection->lastInsertId();   // the important comment is above at insert method... some sources say when INSERT IGNORE does not insert any row lastInsertId gives still the next id... donno.
 
 		if($id === 0) return true;
 		return $id;
@@ -372,7 +340,7 @@ class Access {
 	 * @return string the quoted value or the string NULL if the $str === null
 	 */
 	public function quote($str, bool $addQuoteMarks = true) {
-		return $str === null ? 'NULL' : ($addQuoteMarks ? $this->db->quote($str) : trim($this->db->quote($str), "'"));
+		return $str === null ? 'NULL' : ($addQuoteMarks ? $this->connection->quote($str) : trim($this->connection->quote($str), "'"));
 	}
 
 	/**
@@ -411,7 +379,7 @@ class Access {
 	 * @link http://php.net/manual/en/pdo.begintransaction.php
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
-	public function beginTransaction() { return $this->db->beginTransaction(); }
+	public function beginTransaction() { return $this->connection->beginTransaction(); }
 
 	/**
 	 * (PHP 5 &gt;= 5.1.0, PECL pdo &gt;= 0.1.0)<br/>
@@ -420,7 +388,7 @@ class Access {
 	 * @link http://php.net/manual/en/pdo.commit.php
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
-	public function commit() { return $this->db->commit(); }
+	public function commit() { return $this->connection->commit(); }
 
 	/**
 	 * (PHP 5 &gt;= 5.1.0, PECL pdo &gt;= 0.1.0)<br/>
@@ -429,7 +397,7 @@ class Access {
 	 * @link http://php.net/manual/en/pdo.rollback.php
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
-	public function rollBack() { return $this->db->rollBack(); }
+	public function rollBack() { return $this->connection->rollBack(); }
 
 	/**
 	 * (PHP 5 &gt;= 5.3.3, Bundled pdo_pgsql)<br/>
@@ -438,7 +406,7 @@ class Access {
 	 * @link http://php.net/manual/en/pdo.intransaction.php
 	 * @return bool <b>TRUE</b> if a transaction is currently active, and <b>FALSE</b> if not.
 	 */
-	public function inTransaction() { return $this->db->inTransaction(); }
+	public function inTransaction() { return $this->connection->inTransaction(); }
 
 	// END OF TRANSACTION HANDLING
 
@@ -531,7 +499,7 @@ class Access {
 	 * @return string
 	 */
 	public function getTableType(string $table) {
-		$result = $this->getFirstRow("SHOW FULL TABLES WHERE Tables_in_" . $this->dbServerData['database'] . " = $1", $table);
+		$result = $this->getFirstRow("SHOW FULL TABLES WHERE Tables_in_" . $this->database . " = $1", $table);
 		return $result['Table_type'];
 	}
 

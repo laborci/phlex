@@ -1,5 +1,8 @@
 <?php namespace Phlex\Cli;
 
+use App\Env;
+
+
 abstract class Application extends \Symfony\Component\Console\Application {
 
 	// http://symfony.com/doc/current/components/console/introduction.html
@@ -9,11 +12,7 @@ abstract class Application extends \Symfony\Component\Console\Application {
 	 */
 	abstract public static function getCommands():array;
 
-	public static function cli($debug = false){
-		if($debug){
-			ini_set('display_errors', true);
-			error_reporting(E_ALL);
-		}
+	public static function cli(){
 
 		$application = new static();
 

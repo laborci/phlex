@@ -18,9 +18,14 @@ class Launcher {
 	}
 
 	public static function launch(...$sites) {
+
+		$logger = \App\Env::get('RequestLog');
 		$launcher = new static(...$sites);
 		/** @var Request $request */
 		$request = Request::createFromGlobals();
+		if($logger) {
+			$logger->info($request->getRequestUri(), ['method'=>$request->getMethod()]);
+		}
 		Env::bind('Request')->value($request);
 		$launcher($request);
 	}
