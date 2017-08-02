@@ -28,17 +28,19 @@ class Access {
 	 */
 	public function __construct($dbServerData) {
 		if(is_string($dbServerData)){
-			if(preg_match('/([\w\d]*):(.*?)@([\w\d\.]*)(:([\d]*))*\/([\w\d]*)(:([\d\w]*))*/', trim($dbServerData), $match)) {
-				$dbServerData = [
-					'host'     => $match[3],
-					'dbname'   => $match[6],
-					'user'     => $match[1],
-					'password' => $match[2],
-					'charset'  => $match[8],
-					'port'     => $match[5],
-				];
-			}
+			$url = parse_url($dbServerData);
+			$dbServerData = [
+					'host'     => $url['host'],
+					'dbname'   => trim($url['path'],'/'),
+					'user'     => $url['user'],
+					'password' => $url['pass'],
+					'port'     => $url['port'],
+			];
+
+			parse_str($url['query'], $options);
+			$dbServerData['charset'] = array_key_exists('charset',$options) ? $options['charset'] : 'utf-8';
 		}
+
 		$this->charSet = $dbServerData['charset'];
 		$this->dbServerData = $dbServerData;
 		$this->connect();
@@ -258,7 +260,7 @@ class Access {
 			if(!$fields) $fields = array_map(function ($row) { return ltrim($row, '!'); }, array_keys($data));
 			else if(implode('', $fields) !== implode('', array_map(function ($row) { return ltrim($row, '!'); }, array_keys($data)))) throw new Exception ("Unidentical insertation field list.");
 
-			while(list($key, $val) = each($data)) {
+			foreach($data as $key=>$val){
 				if(substr($key, 0, 1) == '!') {
 					$key = substr($key, 1);
 					array_push($values, strlen($val) == 0 ? 'NULL' : $val);
@@ -297,7 +299,7 @@ class Access {
 		}
 
 		$field_value_pairs = array();
-		while(list($key, $val) = each($data)) {
+		foreach($data as $key=>$val){
 			if($key[0] == '!') {
 				$val = (strlen($val) == 0 ? 'NULL' : $val);
 				array_push($field_value_pairs, '`' . (substr($key, 1) . '`=' . $val));

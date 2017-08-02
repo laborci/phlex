@@ -28,7 +28,7 @@ class UpdateEntityModel extends Command{
 		}catch (\Exception $exception){
 			print_r($exception);
 		}
-		/**  */
+
 		$table =  $repository->getDataSource()->getTable();
 		$access = $repository->getDataSource()->getAccess();
 		$fields = $access->getFieldList($table);
