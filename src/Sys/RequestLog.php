@@ -13,7 +13,7 @@ class RequestLog extends Log{
 				(new OutputFormatterStyle('black', 'cyan'))->apply(' REQUEST ').
 				(new OutputFormatterStyle('white', 'magenta'))->apply(' '.$method.' ');
 		}else{
-			$message = 'SQL / '.$method.' :';
+			$message = 'REQUEST ['.$method.'] ';
 		}
 		$message.=' '.$messageText;
 
