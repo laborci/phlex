@@ -1,6 +1,6 @@
 <?php return [
 	'devmode' => true,
-	'dbDefault' => '{{dbuser}}:{{dbpass}}@{{dbhost}}:{{dbport}}/{{db}}:utf8',
-	'thumbnailCrc32Salt' => "replace with your random string",
-	'passwordSalt' => "replace with your random string",
+	'dbDefault' => 'mysql://{{dbuser}}:{{dbpass}}@{{dbhost}}:{{dbport}}/{{db}}?charset=utf8',
+	'thumbnailCrc32Salt' => "t-{{random}}",
+	'passwordSalt' => "p-{{random}}",
 ];

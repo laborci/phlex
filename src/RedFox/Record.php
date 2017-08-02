@@ -47,7 +47,6 @@ class Record {
 
 	public function set($name, $value) {
 		$field = $this->model->getField($name);
-		print_r($value);echo'<br>';
 		if($field->isWritable() || ($field->isConstant() && is_null($this->get($name)))) {
 			$this->dirty = true;
 			$this->dirtyFields[$name] = true;

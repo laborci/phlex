@@ -2,20 +2,23 @@
 
 use App\Env;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class UpdateEntityModel extends Command{
+class UpdateEntity extends Command{
 	protected function configure() {
 		$this
-			->setName('entity:update')
+			->setName('px:update-entity')
 			->setDescription('Updates model from database table')
 			->addArgument('name', InputArgument::REQUIRED);
 		;
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
+
+		$changes = false;
 
 		$name = $input->getArgument('name');
 		$class = "\\App\\Entity\\".$name."\\".$name;
@@ -55,7 +58,9 @@ class UpdateEntityModel extends Command{
 			foreach ($unwanteds as $unwanted){
 				if(strpos($line, "\$this->addField('".$unwanted."'") === 0){
 					$body[$i] = '//Deleted: '.$line;
+					$output->writeln("<fg=red;bg=black>- $unwanted </>");
 				}
+				$changes = true;
 			}
 		}
 
@@ -80,16 +85,29 @@ class UpdateEntityModel extends Command{
 				}
 				$newline.=");";
 				$body[] = $newline;
+				$output->writeln("<fg=green;bg=black>+ $missing </>");
+				$changes = true;
 			}
 		}
 
-		foreach ($body as $i => $line) {
-			$body[$i] = "\t\t".$line."\n";
+		if(!$changes){
+			$output->writeln("There were no changes...");
+		}else {
+
+			foreach ($body as $i => $line) {
+				$body[$i] = "\t\t" . $line . "\n";
+			}
+
+			array_splice($source, $start, $end - $start, $body);
+
+			file_put_contents($ref->getFileName(), join('', $source));
+			$output->writeln('<info>💾  '.$ref->getFileName().'</info>');
 		}
-
-		array_splice($source, $start, $end-$start,$body);
-
-		file_put_contents($ref->getFileName(), join('', $source));
+		$output->writeln("Decorating model...");
+		exec("./phlex px:decorate-entity ".$name, $lines);
+		foreach ($lines as $line) {
+			$output->writeln($line);
+		}
 
 	}
 

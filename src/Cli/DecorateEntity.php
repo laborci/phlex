@@ -6,10 +6,10 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class UpdateEntityDocBlock extends Command{
+class DecorateEntity extends Command{
 	protected function configure() {
 		$this
-			->setName('entity:decorate')
+			->setName('px:decorate-entity')
 			->setDescription('Updates entity docblock from model')
 			->addArgument('name', InputArgument::REQUIRED);
 		;
@@ -75,6 +75,8 @@ class UpdateEntityDocBlock extends Command{
 		$source = str_replace($doc, $newBlock, $source);
 
 		file_put_contents($ref->getFileName(), $source);
+		$output->writeln('<info>💾  '.$ref->getFileName().'</info>');
+
 	}
 
 

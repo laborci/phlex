@@ -8,7 +8,7 @@ use Symfony\Component\Console\Question\Question;
 class Configure extends Command{
 	protected function configure() {
 		$this
-				->setName('configure')
+				->setName('px:configure')
 				->setDescription('Creates config files')
 		;
 	}
@@ -17,7 +17,7 @@ class Configure extends Command{
 
 		$root = realpath(__DIR__.'/../../../../..');
 		$helper = $this->getHelper('question');
-		$question = new Question('Please enter the domain for your application! ', 'yourawesome.com');
+		$question = new Question('Application domain (yourawesome.com) :', 'yourawesome.com');
 		$domain = $helper->ask($input, $output, $question);
 
 		$localConf = file_get_contents(__DIR__.'/../../templates/config/local.conf');
@@ -25,21 +25,27 @@ class Configure extends Command{
 		$localConf = str_replace('{{path}}', $root, $localConf);
 		file_put_contents($root.'/config/local.conf', $localConf);
 
+		$output->writeln('<info>💾  /config/local.conf</info>');
 
-		$question = new Question('Please enter the default database user! ', 'root');
-		$dbuser = $helper->ask($input, $output, $question);
+		$output->writeln('');
+		$output->writeln('Default database:');
 
-		$question = new Question('Please enter the default database password! ', 'root');
-		$dbpass = $helper->ask($input, $output, $question);
-
-		$question = new Question('Please enter the default database host! ', '127.0.0.1');
+		$question = new Question('- host (127.0.0.1) :', '127.0.0.1');
 		$dbhost = $helper->ask($input, $output, $question);
 
-		$question = new Question('Please enter the default database port! ', '3306');
+		$question = new Question('- name (phlex) :', 'phlex');
+		$db = $helper->ask($input, $output, $question);
+
+		$question = new Question('- user (root) :', 'root');
+		$dbuser = $helper->ask($input, $output, $question);
+
+		$question = new Question('- password (no password) :', '');
+		$dbpass = $helper->ask($input, $output, $question);
+
+		$question = new Question('- port (3306) :', '3306');
 		$dbport = $helper->ask($input, $output, $question);
 
-		$question = new Question('Please enter the default database name! ', 'phlex');
-		$db = $helper->ask($input, $output, $question);
+		$random = md5(time());
 
 		$configPhp = file_get_contents(__DIR__.'/../../templates/config/config.php');
 		$configPhp = str_replace('{{dbuser}}', $dbuser, $configPhp);
@@ -47,7 +53,10 @@ class Configure extends Command{
 		$configPhp = str_replace('{{dbhost}}', $dbhost, $configPhp);
 		$configPhp = str_replace('{{dbport}}', $dbport, $configPhp);
 		$configPhp = str_replace('{{db}}', $db, $configPhp);
+		$configPhp = str_replace('{{random}}', $random, $configPhp);
 		file_put_contents($root.'/config/config.php', $configPhp);
+
+		$output->writeln('<info>💾  /config/config.php</info>');
 
 	}
 

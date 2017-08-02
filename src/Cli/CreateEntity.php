@@ -9,7 +9,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class CreateEntity extends Command{
 	protected function configure() {
 		$this
-			->setName('entity:create')
+			->setName('px:create-entity')
 			->setDescription('Creates new entity')
 			->addArgument('name', InputArgument::REQUIRED);
 		;
@@ -20,9 +20,20 @@ class CreateEntity extends Command{
 		$name = $input->getArgument('name');
 		$dir = Env::instance()->path_root.'App/Entity/'.$name;
 		@mkdir($dir);
-		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'.php')) file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'.php', $this->getEntityClass($name));
-		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Repository.php')) file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Repository.php', $this->getRepositoryClass($name));
-		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Model.php')) file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Model.php', $this->getModelClass($name));
+		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'.php')){
+			file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'.php', $this->getEntityClass($name));
+			$output->writeln('<info>💾  '.'App/Entity/'.$name.'/'.$name.'.php'.'</info>');
+		}
+		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Repository.php')){
+			file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Repository.php', $this->getRepositoryClass($name));
+			$output->writeln('<info>💾  '.'App/Entity/'.$name.'/'.$name.'Repository.php'.'</info>');
+		}
+		if(!file_exists(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Model.php')){
+			file_put_contents(Env::instance()->path_root.'App/Entity/'.$name.'/'.$name.'Model.php', $this->getModelClass($name));
+			$output->writeln('<info>💾  '.'App/Entity/'.$name.'/'.$name.'Model.php'.'</info>');
+		}
+		$output->writeln('done.');
+		$output->writeln('Run command: <info>phlex px:update-entity '.$name.'</info>');
 	}
 
 	protected function parseBlock($docblock){
@@ -36,6 +47,9 @@ class CreateEntity extends Command{
 	}
 
 	protected function getEntityClass($name){
+
+		return str_replace('{{name}}', $name, file_get_contents(__DIR__.'/../../templates/entity/entity.php'));
+
 		return "<?php namespace App\\Entity\\".$name.";
 
 /**
@@ -51,6 +65,8 @@ class ".$name." extends \\Phlex\\RedFox\\Entity{
 	}
 
 	protected function getRepositoryClass($name){
+		return str_replace('{{name}}', $name, file_get_contents(__DIR__.'/../../templates/entity/repository.php'));
+
 		return "<?php namespace App\\Entity\\".$name.";
 
 /**
@@ -64,6 +80,8 @@ class ".$name."Repository extends \\Phlex\\RedFox\\Repository {
 	}
 
 	protected function getModelClass($name){
+		return str_replace('{{name}}', $name, file_get_contents(__DIR__.'/../../templates/entity/model.php'));
+
 		return "<?php namespace App\\Entity\\".$name.";
 
 class ".$name."Model extends \\Phlex\\RedFox\\Model{
@@ -73,7 +91,7 @@ class ".$name."Model extends \\Phlex\\RedFox\\Model{
 	
 	protected function decorateFields(){}
 	protected function relations(){}
-	protected function attachments() {}
+	protected function attachments(){}
 
 }";
 	}

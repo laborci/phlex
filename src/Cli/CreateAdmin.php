@@ -8,7 +8,7 @@ use Symfony\Component\Console\Question\Question;
 class CreateAdmin extends Command{
 	protected function configure() {
 		$this
-				->setName('create-admin')
+				->setName('px:create-admin')
 				->setDescription('Creates admin site')
 		;
 	}

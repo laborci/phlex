@@ -17,6 +17,7 @@
  * @property-read string $url_thumbnails
  * @property-read string $url_files
  * @property-read string $thumbnailCrc32Salt
+ * @property-read string $passwordCrc32Salt
  *
  */
 
