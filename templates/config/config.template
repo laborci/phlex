@@ -1,6 +1,6 @@
 <?php return [
 	'domain' => '{{domain}}',
-	'devmode' => true,
+	'dev-mode' => true,
 	'color-log' => true,
 	'database' => 'mysql://{{dbuser}}:{{dbpass}}@{{dbhost}}:{{dbport}}/{{db}}?charset=utf8',
 	'thumbnailCrc32Salt' => "{{random}}"
