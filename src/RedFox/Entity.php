@@ -12,11 +12,10 @@ abstract class Entity {
 	/** @var  Record */
 	private $record;
 	private $deleted = false;
+	private $repository = null;
 
-	/**
-	 * @return Repository
-	 */
-	public static function repository(){
+
+	public static function repository():Repository{
 		static $repository;
 		if(is_null($repository)){
 			$dataSourceClass = get_called_class().'DataSource';
@@ -26,10 +25,7 @@ abstract class Entity {
 		return $repository;
 	}
 
-	/**
-	 * @return Model
-	 */
-	public static function model(){
+	public static function model():Model{
 		static $model;
 		if(is_null($model)){
 			$class = get_called_class().'Model';
@@ -38,42 +34,53 @@ abstract class Entity {
 		return $model;
 	}
 
-	/**
-	 * @return Cache
-	 */
-	public static function cache(){
-		// TODO: create EntityCache!!!
-		static $cache;
-		if(is_null($cache)){
-			$cache = new Cache();
-		}
-		return $cache;
-	}
-
 	public function isExists(){ return (bool)$this->record->get('id'); }
 	public function isDeleted(){ return $this->deleted; }
+
+	public function delete() {
+		if ($this->isExists()) {
+			if($this->onBeforeDelete() === false) return false;
+			$this->repository->delete($this);
+			$this->onDelete();
+		}
+	}
+
 	public function save(){
 		if($this->isExists()){
-			if($this->onBeforeUpdate() === false) return false;
-			static::repository()->update($this);
-			$this->onUpdate();
+			return $this->update();
 		}else{
-			if($this->onBeforeInsert() === false) return false;
-			$id = static::repository()->insert($this);
-			$this->id = $id;
-			$this->onInsert();
+			return $this->insert();
 		}
+	}
+
+	public function update(){
+		if($this->onBeforeUpdate() === false) return false;
+		$this->repository->update($this);
+		$this->onUpdate();
+		return true;
+	}
+
+	public function insert(){
+		if($this->onBeforeInsert() === false) return false;
+		$id = $this->repository->insert($this);
+		$this->id = $id;
+		$this->onInsert();
 		return $this->id;
 	}
+
 	public function getRawData(){ return $this->record->getRawData(); }
 
-
-
-	public function __construct($data = null) {
+	public function __construct($data = null, Repository $repository = null) {
+		$this->repository = is_null($repository) ? static::repository() : $repository;
 		$this->record = new Record($this->model(), $data);
 		if($this->id){
-			static::cache()->add($this);
+			$this->repository->getCache()->add($this);
 		}
+	}
+
+	public function setRepository(Repository $repository = null, $keepId = false){
+		if(!$keepId) $this->record->set('id', null, true);
+		$this->repository = is_null($repository) ? static::repository() : $repository;
 	}
 
 	#region Evenet Handlers

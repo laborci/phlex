@@ -6,6 +6,8 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+
 
 class UpdateEntity extends Command{
 	protected function configure() {
@@ -17,6 +19,10 @@ class UpdateEntity extends Command{
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
+		$style = new SymfonyStyle($input, $output);
+		$name = $input->getArgument('name');
+
+		$style->title('Updating '.$name.' entity fields');
 
 		$changes = false;
 
@@ -58,7 +64,7 @@ class UpdateEntity extends Command{
 			foreach ($unwanteds as $unwanted){
 				if(strpos($line, "\$this->addField('".$unwanted."'") === 0){
 					$body[$i] = '//Deleted: '.$line;
-					$output->writeln("<fg=red;bg=black>- $unwanted </>");
+					$style->note("- $unwanted");
 				}
 				$changes = true;
 			}
@@ -85,13 +91,13 @@ class UpdateEntity extends Command{
 				}
 				$newline.=");";
 				$body[] = $newline;
-				$output->writeln("<fg=green;bg=black>+ $missing </>");
+				$style->note("+ $missing");
 				$changes = true;
 			}
 		}
 
 		if(!$changes){
-			$output->writeln("There were no changes...");
+			$style->note("There were no changes...");
 		}else {
 
 			foreach ($body as $i => $line) {
@@ -101,12 +107,22 @@ class UpdateEntity extends Command{
 			array_splice($source, $start, $end - $start, $body);
 
 			file_put_contents($ref->getFileName(), join('', $source));
-			$output->writeln('<info>💾  '.substr($ref->getFileName(), strlen(Env::get('path_root'))).'</info>');
+			$style->success('💾  '.substr($ref->getFileName(), strlen(Env::get('path_root'))));
 		}
-		$output->writeln("Decorating model...");
-		exec("./phlex px:decorate-entity ".$name, $lines);
-		foreach ($lines as $line) {
-			$output->writeln($line);
+
+		if($style->confirm('Would you like to run the entity decorator?')) {
+
+			$style->title('Decorating entity ' . $name);
+
+			exec("./phlex px:decorate-entity --quiet " . $name, $lines, $return);
+			if ($return === 0) {
+				$ref = new \ReflectionClass($class);
+				$style->success('💾  ' . substr($ref->getFileName(), strlen(Env::get('path_root'))));
+			} else {
+				foreach ($lines as $line) {
+					$output->writeln($line);
+				}
+			}
 		}
 
 	}

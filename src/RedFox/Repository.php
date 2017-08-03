@@ -1,6 +1,5 @@
 <?php namespace Phlex\RedFox;
 
-use CaseHelper\CaseHelperFactory;
 use Phlex\Database\DataSource;
 use Phlex\Database\Filter;
 use Phlex\Database\Request;
@@ -10,10 +9,17 @@ abstract class Repository {
 	/** @var \Phlex\Database\DataSource  */
 	protected $source;
 	protected $entityClass;
+	/** @var \Phlex\RedFox\Cache  */
+	protected $cache;
 
 	public function __construct($source, $entityClass) {
 		$this->entityClass = $entityClass;
 		$this->source = $source;
+		$this->cache = new Cache();
+	}
+
+	public function getCache(): Cache{
+		return $this->cache;
 	}
 
 	/**
@@ -23,26 +29,18 @@ abstract class Repository {
 
 	public function getDataSource():DataSource{ return $this->source; }
 
-	/**
-	 * @return Cache
-	 */
-	protected function getCache() {
-		$class = $this->entityClass;
-		return $class::cache();
-	}
-
 	public function pick(int $id) {
-		$cached = $this->getCache()->get($id);
+		$cached = $this->cache->get($id);
 		if(!is_null($cached)) return $cached;
 		$data = $this->source->pick($id);
-		$object = new $this->entityClass($data);
+		$object = new $this->entityClass($data, $this);
 		return $object;
 	}
 
 	public function collect(array $id_list) {
 		$objects = [];
 		foreach($id_list as $index => $id) {
-			$cached = $this->getCache()->get($id);
+			$cached = $this->cache->get($id);
 			if(!is_null($cached)) {
 				$objects[] = $cached;
 				unset($id_list[$index]);
@@ -51,7 +49,7 @@ abstract class Repository {
 		if(count($id_list)) {
 			$data = $this->source->collect($id_list);
 			foreach($data as $row) {
-				$objects[] = new $this->entityClass($row);
+				$objects[] = new $this->entityClass($row, $this);
 			}
 		}
 		return $objects;
@@ -68,6 +66,10 @@ abstract class Repository {
 		$this->source->update($data['id'], $data);
 	}
 
+	public function delete(Entity $object){
+		$this->source->delete($object->id);
+	}
+
 	/**
 	 * @return \Phlex\Database\Request
 	 */
@@ -80,12 +82,12 @@ abstract class Repository {
 					$objects = array();
 					$records = $record;
 					foreach($records as $record) {
-						$object = new $this->entityClass($record);
+						$object = new $this->entityClass($record, $this);
 						$objects[] = $object;
 					}
 					return $objects;
 				} else {
-					$object = new $this->entityClass($record);
+					$object = new $this->entityClass($record, $this);
 					return $object;
 				}
 			});

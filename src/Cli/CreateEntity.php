@@ -3,43 +3,81 @@
 use App\Env;
 use CaseHelper\CaseHelperFactory;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+
 
 class CreateEntity extends Command{
 	protected function configure() {
 		$this
 			->setName('px:create-entity')
 			->setDescription('Creates new entity')
-			->addArgument('name', InputArgument::REQUIRED);
+			->addArgument('name', InputArgument::REQUIRED)
+			->addArgument('table')
+			->addArgument('database')
 		;
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
-
+		$style = new SymfonyStyle($input, $output);
 		$name = $input->getArgument('name');
-		$dir = Env::get('path_root').'App/Entity/'.$name;
-		@mkdir($dir);
+		$database = $input->getArgument('database');
+		$table = $input->getArgument('table');
 
-		if(!file_exists($dir.'/'.$name.'.php')){
-			file_put_contents($dir.'/'.$name.'.php', $this->getEntityClass($name));
-			$output->writeln('<info>💾  '.'App/Entity/'.$name.'/'.$name.'.php'.'</info>');
+		$style->title('Creating entity: '.$name);
+
+		$root = Env::get('path_root');
+		$dir = 'App/Entity/'.$name;
+		if(is_dir($root.$dir)){
+			$style->note('Folder ('.$dir.') already exists.');
+		}else {
+			mkdir($root.$dir);
 		}
-		if(!file_exists($dir.'/'.$name.'Repository.php')){
-			file_put_contents($dir.'/'.$name.'Repository.php', $this->getRepositoryClass($name));
-			$output->writeln('<info>💾  '.'App/Entity/'.$name.'/'.$name.'Repository.php'.'</info>');
+
+		$file = $dir.'/'.$name.'.php';
+		if(!file_exists($root.$file)){
+			file_put_contents($root.$file, $this->getEntityClass($name));
+			$style->success('💾  '.$file);
+		}else{
+			$style->note('File ('.$file.') already exists.');
 		}
-		if(!file_exists($dir.'/'.$name.'Model.php')){
-			file_put_contents($dir.'/'.$name.'Model.php', $this->getModelClass($name));
-			$output->writeln('<info>💾  '.'App/Entity/'.$name.'/'.$name.'Model.php'.'</info>');
+
+		$file = $dir.'/'.$name.'Repository.php';
+		if(!file_exists($root.$file)){
+			file_put_contents($root.$file, $this->getRepositoryClass($name));
+			$style->success('💾  '.$file);
+		}else{
+			$style->note('File ('.$file.') already exists.');
 		}
-		if(!file_exists($dir.'/'.$name.'DataSource.php')){
-			file_put_contents($dir.'/'.$name.'DataSource.php', $this->getDataSourceClass($name));
-			$output->writeln('<info>💾  '.'App/Entity/'.$name.'/'.$name.'DataSource.php'.'</info>');
+
+		$file = $dir.'/'.$name.'Model.php';
+		if(!file_exists($root.$file)){
+			file_put_contents($root.$file, $this->getModelClass($name));
+			$style->success('💾  '.$file);
+		}else{
+			$style->note('File ('.$file.') already exists.');
 		}
-		$output->writeln('done.');
-		$output->writeln('Run command: <info>phlex px:update-entity '.$name.'</info>');
+
+
+		$file = $dir.'/'.$name.'DataSource.php';
+		if(!file_exists($root.$file)){
+			file_put_contents($root.$file, $this->getDataSourceClass($name, $database, $table));
+			$style->success('💾  '.$file);
+		}else{
+			$style->note('File ('.$file.') already exists.');
+		}
+
+		$style->success('Done');
+
+		if($style->confirm('Would you like to run the entity updater?')){
+			$command = $this->getApplication()->find('px:update-entity');
+			$updateInput = new ArrayInput(['command' => 'px:update-entity', 'name' => $name]);
+			$command->run($updateInput, $output);
+		}
+
 	}
 
 	protected function parseBlock($docblock){
@@ -63,11 +101,13 @@ class CreateEntity extends Command{
 		$class = str_replace('{{name}}', $name, $class);
 		return $class;
 	}
-	protected function getDataSourceClass($name){
-		$table = CaseHelperFactory::make(CaseHelperFactory::INPUT_TYPE_CAMEL_CASE)->toSnakeCase($name);
+	protected function getDataSourceClass($name, $database, $table){
+		$table = is_null($table) ? CaseHelperFactory::make(CaseHelperFactory::INPUT_TYPE_CAMEL_CASE)->toSnakeCase($name) : $table;
+		$database = is_null($database) ? 'database' : $database;
 		$class = file_get_contents(__DIR__.'/../../templates/entity/dataSource.template');
 		$class = str_replace('{{name}}', $name, $class);
 		$class = str_replace('{{table}}', $table, $class);
+		$class = str_replace('{{database}}', $database, $class);
 		return $class;
 	}
 

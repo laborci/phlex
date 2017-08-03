@@ -50,7 +50,7 @@ class ServiceFactory{
 					if(!is_null($constructor)) {
 						$parameters = $constructor->getParameters();
 						foreach ($parameters as $parameter) {
-							$arguments[] = ServiceManager::get($parameter->getType()->getName());
+							$arguments[] = ServiceManager::get(strval($parameter->getType()));
 						}
 					}
 					$service = new $class(...$arguments);

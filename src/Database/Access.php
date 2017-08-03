@@ -296,7 +296,7 @@ class Access {
 			if(count($sqlParams) > 0) $where = $this->buildSQL($where, $sqlParams);
 		} else $where = $id;
 
-		$where = Filter::factory($where)->GetSql($this);
+		$where = Filter::where($where)->GetSql($this);
 		if(!trim($where)) return false;
 
 		$sql = "DELETE FROM " . $table . " WHERE " . $where;

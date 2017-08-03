@@ -18,7 +18,6 @@ abstract class Environment {
 		$this->setPaths();
 		if(!$cfg) $cfg = 'config.php';
 		$this->config = array_merge($this->config, include $root.'/config/'.$cfg);
-		$this->initialize();
 	}
 
 	protected function initialize(){
@@ -41,7 +40,14 @@ abstract class Environment {
 	}
 
 	// Behind static facade
-	public static function load(){ static::$instance = new static(); }
-	public static function get($name){ return static::$instance->config[$name]; }
+	public static function load(){
+		static::$instance = new static();
+		static::$instance->initialize();
+	}
+
+	public static function get($name){
+		if(!array_key_exists($name, static::$instance->config)) throw new \Exception("[$name] was not found in environment configuration");
+		return static::$instance->config[$name];
+	}
 
 }

@@ -45,9 +45,9 @@ class Record {
 		return $this->model->getField($name)->import($this->record[$name]);
 	}
 
-	public function set($name, $value) {
+	public function set($name, $value, $force = false) {
 		$field = $this->model->getField($name);
-		if($field->isWritable() || ($field->isConstant() && is_null($this->get($name)))) {
+		if($field->isWritable() || $force || ($field->isConstant() && is_null($this->get($name)))) {
 			$this->dirty = true;
 			$this->dirtyFields[$name] = true;
 			$this->data[$name] = $field->set($value);

@@ -17,7 +17,7 @@ class DataSource{
 	public function getTable() { return $this->table; }
 
 	public function __construct($table, $database = 'database') {
-		$this->access = ServiceManager::get('database');
+		$this->access = ServiceManager::get($database);
 		$this->table = $table;
 	}
 

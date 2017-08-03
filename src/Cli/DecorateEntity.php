@@ -5,20 +5,26 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+
 
 class DecorateEntity extends Command{
 	protected function configure() {
 		$this
 			->setName('px:decorate-entity')
 			->setDescription('Updates entity docblock from model')
-			->addArgument('name', InputArgument::REQUIRED);
+			->addArgument('name', InputArgument::REQUIRED)
 		;
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 
+		$style = new SymfonyStyle($input, $output);
+
 		$name = $input->getArgument('name');
 		$class = "\\App\\Entity\\".$name."\\".$name;
+
+		$style->title('Decorating entity '.$name);
 
 		/** @var \Phlex\RedFox\Repository $repository */
 		$repository = $class::repository();
@@ -75,8 +81,9 @@ class DecorateEntity extends Command{
 		$source = str_replace($doc, $newBlock, $source);
 
 		file_put_contents($ref->getFileName(), $source);
-		$output->writeln('<info>💾  '.substr($ref->getFileName(), strlen(Env::get('path_root'))).'</info>');
+		$style->success('💾  '.substr($ref->getFileName(), strlen(Env::get('path_root'))));
 
+		exit(0);
 	}
 
 
