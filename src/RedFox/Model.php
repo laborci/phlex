@@ -12,7 +12,22 @@ abstract class Model {
 	private $entityClass;
 	private $entityShortName;
 
-	public function __construct($entityClass) {
+	abstract function repository();
+
+	private $repositoryCache = [];
+
+	protected function repositoryFactory($table, $database) {
+		$key = $database.'/'.$table;
+		if(!array_key_exists($key, $this->repositoryCache)) {
+			$repositoryClass = $this->entityClass.'Repository';
+			$this->repositoryCache[$key] = new $repositoryClass(new DataSource($table, $database), $this->entityClass);
+		}
+		return $this->repositoryCache[$key];
+	}
+
+	static function instance($entityClass){ static $instance; return !is_null($instance) ? $instance : $instance = new static($entityClass); }
+
+	private function __construct($entityClass) {
 		$this->entityClass = $entityClass;
 		$this->entityShortName = (new \ReflectionClass($entityClass))->getShortName();
 		$this->setup();
@@ -35,11 +50,8 @@ abstract class Model {
 	abstract protected function decorateFields();
 
 	#region Fields
-	/**
-	 * @param string $name
-	 * @return bool
-	 */
-	public function hasField(string $name) { return array_key_exists($name, $this->fields); }
+
+	public function hasField(string $name):bool { return array_key_exists($name, $this->fields); }
 	/**
 	 * @param string $name
 	 * @param        $value
@@ -52,19 +64,11 @@ abstract class Model {
 	 * @return mixed
 	 */
 	public function export(string $name, $value) { return $this->fields[$name]->export($value); }
-	/**
-	 * @param $name
-	 * @return \Phlex\RedFox\Field
-	 */
-	public function getField($name) { return $this->fields[$name]; }
-	/**
-	 * @return array
-	 */
-	public function getFields() { return array_keys($this->fields); }
-	/**
-	 * @param string              $name
-	 * @param \Phlex\RedFox\Field $field
-	 */
+
+	public function getField($name):Field { return $this->fields[$name]; }
+
+	public function getFields():array { return array_keys($this->fields); }
+
 	public function addField(string $name, Field $field) { $this->fields[$name] = $field; }
 	#endregion
 
@@ -82,7 +86,7 @@ abstract class Model {
 	public function getRelations() { return array_keys($this->relations); }
 	public function getRelation($name) { return $this->relations[$name]; }
 	public function isRelationExists($name) { return array_key_exists($name, $this->relations); }
-	public function getRelationValue($name, $object) { return $this->relations[$name]($object); }
+	//public function getRelationValue($name, $object) { return $this->relations[$name]($object); }
 	#endregion
 
 	/** @var  AttachmentDescriptor[] */

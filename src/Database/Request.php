@@ -170,7 +170,7 @@ class Request {
 	 */
 	public function collectData($limit = null, $offset = 0) {
 		$sql = $this->getSql();
-		if($limit) $sql .= ' LIMIT ' . $offset . ', ' . $limit;
+		if(!is_null($limit)) $sql .= ' LIMIT ' . $offset . ', ' . $limit;
 		return $this->dbAccess->getRows($sql);
 	}
 

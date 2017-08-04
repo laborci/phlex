@@ -1,6 +1,7 @@
 <?php namespace Phlex\Cli;
 
 use App\Env;
+use Phlex\RedFox\Relation\BackReference;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,7 +22,7 @@ class DecorateEntity extends Command{
 
 		$style = new SymfonyStyle($input, $output);
 
-		$name = $input->getArgument('name');
+		$name = ucfirst($input->getArgument('name'));
 		$class = "\\App\\Entity\\".$name."\\".$name;
 
 		$style->title('Decorating entity '.$name);
@@ -57,21 +58,22 @@ class DecorateEntity extends Command{
 		$fields = $model->getFields();
 		foreach ($fields as $field){
 			$fieldObj = $model->getField($field);
-			$line = ' * px: @property'.(!$fieldObj->isWritable() ? '-read' : '').' '.$fieldObj->getDataType().' $'.$field;
-			$generatedLines[] = $line;
+			$generatedLines[] = ' * px: @property'.(!$fieldObj->isWritable() ? '-read' : '').' '.$fieldObj->getDataType().' $'.$field;
 		}
 
 		$relations = $model->getRelations();
 		foreach ($relations as $relation){
 			$relationObj = $model->getRelation($relation);
-			$line = ' * px: @property-read'.' '.$relationObj->getRelatedClass().' $'.$relation;
-			$generatedLines[] = $line;
+			$generatedLines[] = ' * px: @property-read'.' '.$relationObj->getRelatedClass().' $'.$relation;
+			$style->warning(get_class($relationObj));
+			if($relationObj instanceof BackReference){
+				$generatedLines[] = ' * px: @method'.' '.$relationObj->getRelatedClass().' '.$relation.'($order=null, $limit=null, $offset=null)';
+			}
 		}
 
 		$attahcmentGroups = $model->getAttachmentGroups();
 		foreach ($attahcmentGroups as $attahcmentGroup){
-			$line = ' * px: @property-read \\Phlex\\RedFox\\Attachment\\AttachmentManager $'.$attahcmentGroup;
-			$generatedLines[] = $line;
+			$generatedLines[] = ' * px: @property-read \\Phlex\\RedFox\\Attachment\\AttachmentManager $'.$attahcmentGroup;
 		}
 
 

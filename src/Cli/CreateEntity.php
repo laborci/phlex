@@ -23,7 +23,7 @@ class CreateEntity extends Command{
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 		$style = new SymfonyStyle($input, $output);
-		$name = $input->getArgument('name');
+		$name = ucfirst($input->getArgument('name'));
 		$database = $input->getArgument('database');
 		$table = $input->getArgument('table');
 
@@ -55,20 +55,20 @@ class CreateEntity extends Command{
 
 		$file = $dir.'/'.$name.'Model.php';
 		if(!file_exists($root.$file)){
-			file_put_contents($root.$file, $this->getModelClass($name));
+			file_put_contents($root.$file, $this->getModelClass($name, $database, $table));
 			$style->success('💾  '.$file);
 		}else{
 			$style->note('File ('.$file.') already exists.');
 		}
 
-
-		$file = $dir.'/'.$name.'DataSource.php';
-		if(!file_exists($root.$file)){
-			file_put_contents($root.$file, $this->getDataSourceClass($name, $database, $table));
-			$style->success('💾  '.$file);
-		}else{
-			$style->note('File ('.$file.') already exists.');
-		}
+		//
+		//$file = $dir.'/'.$name.'DataSource.php';
+		//if(!file_exists($root.$file)){
+		//	file_put_contents($root.$file, $this->getDataSourceClass($name, $database, $table));
+		//	$style->success('💾  '.$file);
+		//}else{
+		//	$style->note('File ('.$file.') already exists.');
+		//}
 
 		$style->success('Done');
 
@@ -111,9 +111,11 @@ class CreateEntity extends Command{
 		return $class;
 	}
 
-	protected function getModelClass($name){
+	protected function getModelClass($name, $database, $table){
 		$class = file_get_contents(__DIR__.'/../../templates/entity/model.template');
 		$class = str_replace('{{name}}', $name, $class);
+		$class = str_replace('{{table}}', $table, $class);
+		$class = str_replace('{{database}}', $database, $class);
 		return $class;	}
 
 }

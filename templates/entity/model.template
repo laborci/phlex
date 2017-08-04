@@ -2,6 +2,8 @@
 
 class {{name}}Model extends \Phlex\RedFox\Model{
 
+	public function repository(){ return $this->repositoryFactory('{{table}}', '{{database}}'); }
+
 	protected function fields(){
 	}
 

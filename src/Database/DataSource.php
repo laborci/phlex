@@ -6,18 +6,18 @@ class DataSource{
 
 	/** @var  Access */
 	protected $access;
-
 	/** @var string */
 	protected $table;
+	/** @var  string */
+	protected $database;
 
-	/** @return \Phlex\Database\Access */
-	public function getAccess() { return $this->access; }
+	public function getAccess():Access { return $this->access; }
+	public function getTable():string { return $this->table; }
+	public function getDatabase():string { return $this->database; }
 
-	/** @return string */
-	public function getTable() { return $this->table; }
-
-	public function __construct($table, $database = 'database') {
+	public function __construct($table, $database) {
 		$this->access = ServiceManager::get($database);
+		$this->database = $database;
 		$this->table = $table;
 	}
 
@@ -26,7 +26,7 @@ class DataSource{
 	}
 
 	public function collect(array $ids){
-		return $this->access->getRows("SELECT * FROM " . $this->access->escapeSQLEntity($this->table) . " WHERE id IN ($1)", $ids);
+		return $this->access->getRowsById($this->table, $ids);
 	}
 
 	public function insert(array $data){

@@ -8,28 +8,20 @@ class BackReference {
 	protected $class;
 	protected $field;
 
-	/**
-	 * BackReference constructor.
-	 *
-	 * @param string $class
-	 * @param string $field
-	 */
 	public function __construct(string $class, string $field) {
 		$this->class = $class;
 		$this->field = $field;
 	}
 
-	/**
-	 * @param \Phlex\RedFox\Entity $object
-	 * @return mixed
-	 */
-	public function __invoke(Entity $object){
+	public function __invoke(Entity $object, $order=null, $limit=null, $offset = 0):array{
 		$class = $this->class;
 		$field = $this->field;
 		/** @var \Phlex\RedFox\Repository $repository */
 		$repository = $class::repository();
-		return $repository->getSourceRequest(Filter::where($field.'=$1', $object->id))->collect();
+		return $repository->getSourceRequest(Filter::where($field.'=$1', $object->id))->orderIf(!is_null($order), $order)->collect($limit, $offset);
 	}
+
+
 	public function getRelatedClass(): string {
 		return '\\'.$this->class.'[]';
 	}

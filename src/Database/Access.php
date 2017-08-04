@@ -141,6 +141,20 @@ class Access {
 	}
 
 	/**
+	 * Returns a row from the specified table having the specified id
+	 *
+	 * @param string $table
+	 * @param int    $id
+	 * @return array
+	 */
+	public function getRowsById(string $table, array $ids) {
+		$table = $this->escapeSQLEntity($table);
+		print_r($ids);
+		$sql = 'SELECT * FROM '.$table.' WHERE  id IN ('.join(',', $this->quoteArray($ids)).')';
+		return $this->getRows($sql);
+	}
+
+	/**
 	 * An alias of getRows:
 	 * Returns the complete result set as associative a pure PHP array. Can contain $# placeholders.
 	 *

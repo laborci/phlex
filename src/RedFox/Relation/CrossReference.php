@@ -28,6 +28,7 @@ class CrossReference {
 		$rels = $req->collect();
 		return $class::repository()->collect($rels);
 	}
+
 	public function getRelatedClass(): string {
 		return '\\'.$this->class.'[]';
 	}

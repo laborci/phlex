@@ -1,6 +1,7 @@
 <?php namespace Phlex\RedFox;
 
 use Phlex\Database\DataSource;
+use Phlex\Database\Exception;
 use Phlex\Database\Filter;
 use Phlex\Database\Request;
 
@@ -33,6 +34,9 @@ abstract class Repository {
 		$cached = $this->cache->get($id);
 		if(!is_null($cached)) return $cached;
 		$data = $this->source->pick($id);
+		if(!$data) {
+			throw new Exception('Entity could not be found: '.$this->entityClass.'('.$id.') in '.$this->source->getDatabase().'/'.$this->source->getTable(), 0);
+		}
 		$object = new $this->entityClass($data, $this);
 		return $object;
 	}

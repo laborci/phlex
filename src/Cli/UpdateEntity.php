@@ -2,7 +2,6 @@
 
 use App\Env;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -14,13 +13,14 @@ class UpdateEntity extends Command{
 		$this
 			->setName('px:update-entity')
 			->setDescription('Updates model from database table')
-			->addArgument('name', InputArgument::REQUIRED);
+			->addArgument('name', InputArgument::REQUIRED)
+			->addOption('autodecorate')
 		;
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 		$style = new SymfonyStyle($input, $output);
-		$name = $input->getArgument('name');
+		$name = ucfirst($input->getArgument('name'));
 
 		$style->title('Updating '.$name.' entity fields');
 
@@ -110,7 +110,9 @@ class UpdateEntity extends Command{
 			$style->success('💾  '.substr($ref->getFileName(), strlen(Env::get('path_root'))));
 		}
 
-		if($style->confirm('Would you like to run the entity decorator?')) {
+		$autodecorate = $input->getOption('autodecorate');
+
+		if($autodecorate || $style->confirm('Would you like to run the entity decorator?')) {
 
 			$style->title('Decorating entity ' . $name);
 

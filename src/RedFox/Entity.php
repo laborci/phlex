@@ -1,6 +1,10 @@
 <?php namespace Phlex\RedFox;
 
 
+use Phlex\Database\DataSource;
+use Phlex\RedFox\Relation\BackReference;
+
+
 /**
  * Class Entity
  * @package Phlex\RedFox
@@ -14,22 +18,20 @@ abstract class Entity {
 	private $deleted = false;
 	private $repository = null;
 
+	/**
+	 * @return \Phlex\RedFox\Repository
+	 */
 
-	public static function repository():Repository{
-		static $repository;
-		if(is_null($repository)){
-			$dataSourceClass = get_called_class().'DataSource';
-			$repositoryClass = get_called_class().'Repository';
-			$repository = new $repositoryClass(new $dataSourceClass, get_called_class());
-		}
-		return $repository;
-	}
+	public static function repository(){ return static::model()->repository(); }
 
-	public static function model():Model{
+	/**
+	 * @return \Phlex\RedFox\Model
+	 */
+	public static function model(){
 		static $model;
 		if(is_null($model)){
 			$class = get_called_class().'Model';
-			$model = new $class(get_called_class());
+			$model = $class::instance( get_called_class() );
 		}
 		return $model;
 	}
@@ -100,7 +102,7 @@ abstract class Entity {
 		}else if($this->record->hasField($name)){
 			return $this->record->get($name);
 		}else if(static::model()->isRelationExists($name)){
-			return static::model()->getRelationValue($name, $this);
+			return static::model()->getRelation($name)($this);
 		}else if(array_key_exists($name, $this->attachmentManagers)){
 			return $this->attachmentManagers[$name];
 		}else if(static::model()->isAttachmentGroupExists($name)){
@@ -108,6 +110,18 @@ abstract class Entity {
 			return $this->attachmentManagers[$name];
 		}
 		return null;
+	}
+
+	public function __call($name, $arguments) {
+		if(static::model()->isRelationExists($name)){
+			/** @var BackReference $relation */
+			$relation = static::model()->getRelation($name);
+			if($relation instanceof BackReference){
+				list($order, $limit, $offset) = $arguments;
+				return $relation($this, $order, $limit, $offset);
+			}
+		}
+		trigger_error('Call to undefined method '.__CLASS__.'::'.$name.'()', E_USER_ERROR);
 	}
 
 	public function __set($name, $value) {
