@@ -342,270 +342,36 @@ class Access {
 		return $sql;
 	}
 
-	// ESCAPE AND QUOTE FUNCTIONS
+	#region escape & quote
+	public function quote($subject, bool $quote = true):string { return $subject === null ? 'NULL' : ($quote ? $this->connection->quote($subject) : trim($this->connection->quote($subject),"'")); }
+	public function quoteArray(array $array, bool $quote = true):array { return array_map(function($val) use ($quote) {return $this->quote($val, $quote);}, $array); }
+	public function escapeSQLEntity($subject):string { return '`'.$subject.'`'; }
+	public function escapeSQLEntities(array $array):array { return array_map(function($val)  {return $this->escapeSQLEntity($val, $quote);}, $array); }
+	#endregion
 
-	/**
-	 * Quotes the specified value.
-	 *
-	 * @param string  $str           value to quote
-	 * @param boolean $addQuoteMarks if it's true result will be enclosed into ' (apos) characters
-	 * @return string the quoted value or the string NULL if the $str === null
-	 */
-	public function quote($str, bool $addQuoteMarks = true) {
-		return $str === null ? 'NULL' : ($addQuoteMarks ? $this->connection->quote($str) : trim($this->connection->quote($str), "'"));
-	}
+	#region transaction
+	public function beginTransaction():bool { return $this->connection->beginTransaction(); }
+	public function commit():bool { return $this->connection->commit(); }
+	public function rollBack():bool { return $this->connection->rollBack(); }
+	public function inTransaction():bool { return $this->connection->inTransaction(); }
+	#endregion
 
-	/**
-	 * Quotes the values of the given array
-	 *
-	 * @param array   $array         of values need to be quoted
-	 * @param boolean $addQuoteMarks if it's true result elements will be enclosed into ' (apos) characters
-	 * @return array array of the quoted elements. null elements are translated to NULL strings.
-	 */
-	public function quoteArray(array $array, bool $addQuoteMarks = true) {
-		if($array) foreach($array as $key => $value) $array[$key] = $this->quote($value, $addQuoteMarks);
-		return $array;
-	}
+	#region table manipulation
+	public function tableExists(string $table):bool { return $this->getFirstRow("SHOW TABLES LIKE '" . $table . "'") ? true : false; }
+	public function getTableType(string $table):string { return $this->getFirstRow("SHOW FULL TABLES WHERE Tables_in_" . $this->database . " = $1", $table)['Table_type']; }
+	public function renameTable(string $from, string $to):void { $this->query("RENAME TABLE " . $this->escapeSQLEntity($from) . " TO " . $this->escapeSQLEntity($to)); 	}
+	public function addTable(string $table, string $properties):void {$this->query("CREATE TABLE ".$this->escapeSQLEntity($table)." " . $properties); }
+	public function deleteTable(string $table):void { $this->query("DROP TABLE ".$this->escapeSQLEntity($table)); }
+	public function addView(string $view, string $select):void { $this->query("CREATE VIEW ".$this->escapeSQLEntity($view)." AS ".$select); }
+	public function deleteView(string $view):void { $this->query("DROP VIEW IF EXISTS `" . $view . "`"); }
+	#endregion
 
-	/**
-	 * Escapes a DB object/entity with ` (backtick) character
-	 *
-	 * @param string $string The entity needs to be quoted
-	 * @return string The quoted object name
-	 */
-	public function escapeSQLEntity($string) { return '`' . trim($string, '`') . '`'; }
-
-	public function escapeSQLEntities(array $arrayOfStrings) {
-		foreach($arrayOfStrings as $i => $string) $arrayOfStrings[$i] = '`' . trim($string, '`') . '`';
-		return $arrayOfStrings;
-	}
-
-	// END OF ESCAPE AND QUOTE FUNCTIONS
-
-	// TRANSACTION HANDLING
-
-	/**
-	 * (PHP 5 &gt;= 5.1.0, PECL pdo &gt;= 0.1.0)<br/>
-	 * Initiates a transaction
-	 *
-	 * @link http://php.net/manual/en/pdo.begintransaction.php
-	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
-	 */
-	public function beginTransaction() { return $this->connection->beginTransaction(); }
-
-	/**
-	 * (PHP 5 &gt;= 5.1.0, PECL pdo &gt;= 0.1.0)<br/>
-	 * Commits a transaction
-	 *
-	 * @link http://php.net/manual/en/pdo.commit.php
-	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
-	 */
-	public function commit() { return $this->connection->commit(); }
-
-	/**
-	 * (PHP 5 &gt;= 5.1.0, PECL pdo &gt;= 0.1.0)<br/>
-	 * Rolls back a transaction
-	 *
-	 * @link http://php.net/manual/en/pdo.rollback.php
-	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
-	 */
-	public function rollBack() { return $this->connection->rollBack(); }
-
-	/**
-	 * (PHP 5 &gt;= 5.3.3, Bundled pdo_pgsql)<br/>
-	 * Checks if inside a transaction
-	 *
-	 * @link http://php.net/manual/en/pdo.intransaction.php
-	 * @return bool <b>TRUE</b> if a transaction is currently active, and <b>FALSE</b> if not.
-	 */
-	public function inTransaction() { return $this->connection->inTransaction(); }
-
-	// END OF TRANSACTION HANDLING
-
-	// STRUCTURE INFO AND MANIPULATIONS
-
-	/**
-	 * Returns the possible enum values of the speicified field
-	 *
-	 * @param string $tableName the name of the table
-	 * @param string $field     the name of the enum field
-	 * @return array the enum options
-	 */
-	public function getEnumValues(string $tableName, string $field) {
-		$table = $this->escapeSQLEntity($tableName);
-
-		$sql = "SHOW COLUMNS FROM $table LIKE " . $this->quote($field);
-		$result = $this->query($sql);
-		if(!$result) throw new DBException('error getting enum field ', 'cannotReadEnumOptions');
-		$row = $result->fetch(PDO::FETCH_NUM);
-		$regex = "/'(.*?)'/";
-		preg_match_all($regex, $row[1], $enum_array);
-		$enum_fields = $enum_array[1];
-		return $enum_fields;
-	}
-
-	/**
-	 * Creates or delets the specified table depending on the $condition param.
-	 *
-	 * @param boolean $condition  true: creates the table; false: drops the table
-	 * @param string  $table      the name of the table
-	 * @param string  $properties properties of the table to create with
-	 */
-	public function toggleTable(bool $condition, string $table, string $properties) {
-		if($condition) $this->addTable($table, $properties);
-		else $this->delTable($table);
-	}
-
-	/**
-	 * Renames the specified table
-	 *
-	 * @param string $from original name
-	 * @param string $to   new name
-	 * @return boolean
-	 */
-	public function renameTable(string $from, string $to) {
-		if($this->tableExists($from) && (strtolower($from) == strtolower($to) || !$this->tableExists($to))) return $this->query("RENAME TABLE " . $this->escapeSQLEntity($from) . " TO " . $this->escapeSQLEntity($to));
-		return false;
-	}
-
-	/**
-	 * Creates a new table
-	 *
-	 * @param string $table      the name of the table
-	 * @param string $properties the properties of the table to create with
-	 */
-	public function addTable(string $table, string $properties) {
-		$this->query("CREATE TABLE IF NOT EXISTS `" . $table . "` " . $properties);
-	}
-
-	/**
-	 * Drops a table
-	 *
-	 * @param string $table the name of the table to drop
-	 */
-	public function delTable(string $table) { $this->query("DROP TABLE IF EXISTS `" . $table . "`"); }
-
-	/**
-	 * Creates a new view
-	 *
-	 * @param string $view   the name of the view
-	 * @param string $select the select statement of the view to create
-	 */
-	public function addView(string $view, string $select) {
-		if(!$this->hasTable($view)) {
-			$this->query("CREATE VIEW `" . $view . "` AS " . $select);
-		}
-	}
-
-	/**
-	 * Drops a view
-	 *
-	 * @param string $view the name of the view to drop
-	 */
-	public function delView($view) { $this->query("DROP VIEW IF EXISTS `" . $view . "`"); }
-
-	/**
-	 * Returns the type of a table object (table or view)
-	 *
-	 * @param string $table name of the table
-	 * @return string
-	 */
-	public function getTableType(string $table) {
-		$result = $this->getFirstRow("SHOW FULL TABLES WHERE Tables_in_" . $this->database . " = $1", $table);
-		return $result['Table_type'];
-	}
-
-	/**
-	 * Adds or drops a field in/from a table
-	 *
-	 * @param boolean $condition  true: creates the field; false: drops the field
-	 * @param string  $table      the name of the table
-	 * @param string  $field      the name of the field
-	 * @param string  $properties properties of the field will be created
-	 */
-	public function toggleField(bool $condition, string $table, string $field, string $properties) {
-		if($condition) $this->addField($table, $field, $properties);
-		else $this->delField($table, $field);
-	}
-
-	/**
-	 * Adds a field to the specified table
-	 *
-	 * @param string $table      the name of the table
-	 * @param string $field      the name of the field
-	 * @param string $properties properties of the field will be created
-	 */
-	public function addField(string $table, string $field, string $properties) {
-		if(!$this->hasField($table, $field)) $this->query("ALTER TABLE " . $this->escapeSQLEntity($table) . " ADD " . $this->escapeSQLEntity($field) . " " . $properties);
-	}
-
-	/**
-	 * Drops the specified field from the specified table
-	 *
-	 * @param string $table the name of the table
-	 * @param string $field the name of the field to drop
-	 */
-	public function delField(string $table, string $field) {
-		if($this->hasField($table, $field)) $this->query("ALTER TABLE " . $this->escapeSQLEntity($table) . " DROP " . $this->escapeSQLEntity($field));
-	}
-
-	/**
-	 * Returns the list of field names of the given table
-	 *
-	 * @param string $table
-	 * @return array<string>
-	 */
-	public function getFieldList(string $table) {
-		$fieldData = $this->getFieldData($table);
-		$fields = array();
-		foreach($fieldData as $field) $fields[] = $field['Field'];
-		return $fields;
-	}
-
-	/**
-	 * Returns the detailed information of fields of the given table
-	 *
-	 * @param string $table
-	 * @return array<array<string>>
-	 */
-	public function getFieldData(string $table) {
-		return $this->getAll("SHOW FULL COLUMNS FROM " . $this->escapeSQLEntity($table));
-	}
-
-	/**
-	 * An alias of hasTable
-	 * Says that the database has a table named $table
-	 *
-	 * @param string $table name of the table
-	 * @return boolean true: table exists; false: table does not exist
-	 */
-	public function tableExists(string $table) { return $this->hasTable($table); }
-
-	/**
-	 * Says that the database has a table named $table
-	 *
-	 * @param string $table name of the table
-	 * @return boolean true: table exists; false: table does not exist
-	 */
-	public function hasTable(string $table) { return $this->getFirstRow("SHOW TABLES LIKE '" . $table . "'") ? true : false; }
-
-	/**
-	 * An alias of hasField
-	 * Says that the specified table has a field named $field
-	 *
-	 * @param string $table name of the table
-	 * @param string $field name of the field
-	 * @return boolean true: field exists; false: field does not exist
-	 */
-	public function fieldExists(string $table, string $field) { return $this->hasField($table, $field); }
-
-	/**
-	 * Says that the specified table has a field named $field
-	 *
-	 * @param string $table name of the table
-	 * @param string $field name of the field
-	 * @return boolean true: field exists; false: field does not exist
-	 */
-	public function hasField(string $table, string $field) { return $this->getFirstRow("SHOW FULL COLUMNS FROM `" . $table . "` WHERE Field = '" . $field . "'") ? true : false; }
-
+	#region field manipulation
+	public function fieldExists(string $table, string $field):bool { return $this->getFirstRow("SHOW FULL COLUMNS FROM `" . $table . "` WHERE Field = '" . $field . "'") ? true : false; }
+	public function addField(string $table, string $field, string $properties):void { $this->query("ALTER TABLE ".$this->escapeSQLEntity($table)." ADD ".$this->escapeSQLEntity($field)." ".$properties); }
+	public function deleteField(string $table, string $field):void { $this->query("ALTER TABLE ".$this->escapeSQLEntity($table)." DROP ".$this->escapeSQLEntity($field)); }
+	public function getFieldList(string $table):array { return array_column($this->getFieldData($table), 'Field'); }
+	public function getFieldData(string $table):array { return $this->getAll("SHOW FULL COLUMNS FROM " . $this->escapeSQLEntity($table)); }
+	public function getEnumValues(string $tableName, string $field):array { preg_match_all("/'(.*?)'/", $this->getRows("DESCRIBE ".$this->escapeSQLEntity($tableName)." ".$this->quote($field))[0]['Type'], $matches); return $matches[1]; }
+	#endregion
 }
