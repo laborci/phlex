@@ -102,8 +102,6 @@ class CreateEntity extends Command{
 		return $class;
 	}
 	protected function getDataSourceClass($name, $database, $table){
-		$table = is_null($table) ? CaseHelperFactory::make(CaseHelperFactory::INPUT_TYPE_CAMEL_CASE)->toSnakeCase($name) : $table;
-		$database = is_null($database) ? 'database' : $database;
 		$class = file_get_contents(__DIR__.'/../../templates/entity/dataSource.template');
 		$class = str_replace('{{name}}', $name, $class);
 		$class = str_replace('{{table}}', $table, $class);
@@ -112,10 +110,13 @@ class CreateEntity extends Command{
 	}
 
 	protected function getModelClass($name, $database, $table){
+		$table = is_null($table) ? CaseHelperFactory::make(CaseHelperFactory::INPUT_TYPE_CAMEL_CASE)->toSnakeCase($name) : $table;
+		$database = is_null($database) ? 'database' : $database;
 		$class = file_get_contents(__DIR__.'/../../templates/entity/model.template');
 		$class = str_replace('{{name}}', $name, $class);
 		$class = str_replace('{{table}}', $table, $class);
 		$class = str_replace('{{database}}', $database, $class);
-		return $class;	}
+		return $class;
+	}
 
 }
