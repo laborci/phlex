@@ -2,15 +2,18 @@
 
 // Todo: implement as ArrayAccess
 
+use Phlex\Sys\ServiceManager;
+
 class Storage{
 	
 	protected $__cache = array();
+	/** @var  Access */
 	protected $access;
-	protected $storageTable;
+	protected $table;
 
-	public function __construct(Access $access, $storageTable) {
-		$this->access = $access;
-		$this->storageTable = $storageTable;
+	public function __construct(string $database, $table) {
+		$this->access = ServiceManager::get($database);
+		$this->table = $table;
 	}
 
 	function __invoke($key, $value = null) {
@@ -24,7 +27,7 @@ class Storage{
 
 	public function get($key){
 		if (!array_key_exists($key, $this->__cache)) {
-			$data = $this->access->getValue("SELECT value FROM ".$this->storageTable." WHERE `key`=$1", $key);
+			$data = $this->access->getValue("SELECT value FROM ".$this->table." WHERE `key`=$1", $key);
 			if(!$data) return null;
 			$this->__cache[$key] = unserialize($data);
 		}
@@ -37,7 +40,7 @@ class Storage{
 		} else {
 			$this->__cache[$key] = $value;
 			$value = serialize($value);
-			$this->access->query("INSERT INTO " . $this->storageTable . " (`key`, `value`) VALUES ($1, $2) ON DUPLICATE KEY UPDATE `value`=$2", $key, $value);
+			$this->access->query("INSERT INTO " . $this->table . " (`key`, `value`) VALUES ($1, $2) ON DUPLICATE KEY UPDATE `value`=$2", $key, $value);
 		}
 	}
 
@@ -48,17 +51,17 @@ class Storage{
 		$keys = !is_array($key)?[$key]:$key;
 		if ($keys) {
 			foreach ($keys as $key) if (array_key_exists($key, $this->__cache)) unset($this->__cache[$key]);
-			$this->access->Delete($this->storageTable, '`key` IN ($1)', $keys);
+			$this->access->delete($this->table, Filter::where("`key` in $1", $keys));
 		}
 	}
 	
 	public function getKeys($sqlPattern = null) {
 		$extension = $sqlPattern === null?'':" WHERE `key` LIKE $1 ";
-		return $this->access->getRows("SELECT `key` AS __VALUE__ FROM `".$this->storageTable."`".$extension, $sqlPattern);
+		return $this->access->getValues("SELECT `key` FROM `".$this->table."`".$extension, $sqlPattern);
 	}
 	
 	public function getValuesByPrefix($prefix) {
-		return $this->access->getRows("SELECT `key` AS __KEY__, `value` AS __VALUE FROM `".$this->storageTable."` WHERE `key` LIKE $1 ", $prefix.'%');
+		return $this->access->getValuesWithKey("SELECT `key`, `value` FROM `".$this->table."` WHERE `key` LIKE $1 ", $prefix.'%');
 	}
 
 }

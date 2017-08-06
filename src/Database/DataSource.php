@@ -34,11 +34,11 @@ class DataSource{
 	}
 
 	public function update($id, array $data){
-		return $this->access->update($this->table, $data, $id);
+		return $this->access->updateById($this->table, $id, $data);
 	}
 
 	public function delete($id){
-		return $this->access->delete($this->table, $id);
+		return $this->access->deleteById($this->table, $id);
 	}
 
 }
