@@ -27,6 +27,20 @@ class AttachmentDescriptor{
 		return $this;
 	}
 
+	/**
+	 * @return null
+	 */
+	public function getAcceptedExtensions() {
+		return $this->acceptedExtensions;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getMaxFileSize() {
+		return $this->maxFileSize;
+	}
+
 	public function maxFileCount(int $maxFileCount){
 		$this->maxFileCount = $maxFileCount;
 		return $this;
@@ -45,7 +59,7 @@ class AttachmentDescriptor{
 	 * @return bool
 	 */
 	public function isValidUpload(File $upload){
-		
+
 		if($upload->getSize() > $this->maxFileSize) {
 			return false;
 		}

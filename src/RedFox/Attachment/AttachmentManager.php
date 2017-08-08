@@ -49,14 +49,15 @@ class AttachmentManager{
 		if(!is_dir($this->path)){ mkdir($this->path, 0777, true); }
 	}
 
-	public function uploadFile(UploadedFile $upload) {
+	public function uploadFile(UploadedFile $file) {
 		if($this->getAttachmentCount() >= $this->descriptor->getMaxFileCount()) {
 			return false;
-		}elseif(!$this->descriptor->isValidUpload($upload)) {
-			echo 'notvalid';
+		}elseif( $file->getClientSize() > $this->descriptor->getMaxFileSize() ) {
+			return false;
+		}elseif( ! in_array($file->getClientOriginalExtension(), $this->descriptor->getAcceptedExtensions() )) {
 			return false;
 		}else{
-			$upload->move($this->path, $upload->getClientOriginalName());
+			$file->move($this->path, $file->getClientOriginalName());
 			$this->attachments = null;
 			return true;
 		}
@@ -65,8 +66,9 @@ class AttachmentManager{
 	public function addFile(File $file){
 		if($this->getAttachmentCount() >= $this->descriptor->getMaxFileCount()) {
 			return false;
-		}elseif(!$this->descriptor->isValidUpload($file)) {
-			echo 'notvalid';
+		}elseif( $file->getSize() > $this->descriptor->getMaxFileSize() ) {
+			return false;
+		}elseif( ! in_array($file->getExtension(), $this->descriptor->getAcceptedExtensions() )) {
 			return false;
 		}else{
 			echo $file->getPath().'/'.$file->getFilename()."\n";
