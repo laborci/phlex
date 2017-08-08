@@ -81,20 +81,8 @@ abstract class Repository {
 		$repository = $this;
 		return new Request(
 			$this->source->getAccess(),
-			function ($record, $multi = false) {
-				if($multi) {
-					$objects = array();
-					$records = $record;
-					foreach($records as $record) {
-						$object = new $this->entityClass($record, $this);
-						$objects[] = $object;
-					}
-					return $objects;
-				} else {
-					$object = new $this->entityClass($record, $this);
-					return $object;
-				}
-			});
+			function ($record){ return new $this->entityClass($record, $this); }
+		);
 	}
 
 	/**
@@ -102,9 +90,11 @@ abstract class Repository {
 	 * @return \Phlex\Database\Request
 	 */
 	public function getSourceRequest(Filter $filter = null) {
-		$request = $this->getDBRequest()->from($this->source->getAccess()->escapeSQLEntity($this->source->getTable()));
-		if(!is_null($filter))
+		$table = $this->source->getAccess()->escapeSQLEntity($this->source->getTable());
+		$request = $this->getDBRequest()->select($table.'.*')->from($table);
+		if(!is_null($filter)) {
 			$request->where($filter);
+		}
 		return $request;
 	}
 
