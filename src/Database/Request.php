@@ -10,7 +10,7 @@ class Request {
 	/** @var string */
 	protected $select = '*';
 	/** @var string */
-	protected $keyField = null;
+	protected $key = null;
 	/** @var  string */
 	protected $from = null;
 	/** @var  Filter */
@@ -37,13 +37,8 @@ class Request {
 		return $this;
 	}
 
-	/**
-	 * @param      $sql
-	 * @param null $sqlParams
-	 * @return $this
-	 */
-	public function key(string $sql, ...$sqlParams) {
-		$this->keyField = $this->dbAccess->buildSQL($sql . ' ', $sqlParams);
+	public function key(string $key) {
+		$this->key = $key;
 		return $this;
 	}
 
@@ -139,10 +134,10 @@ class Request {
 	 * @param int  $offset
 	 * @return mixed
 	 */
-	public function collect($limit = null, $offset = 0) {
+	public function collect($limit = null, $offset = null) {
 		$data = $this->collectData($limit, $offset);
 		if($converter = $this->converter) {
-			$data = $converter($data, true);
+			$data = array_map($converter, $data);
 		}
 		return $data;
 	}
@@ -153,10 +148,12 @@ class Request {
 	 * @return null
 	 */
 	public function pick() {
-		$data = $this->collectData(1, 0);
+		$data = $this->collectData(1);
 		if($data) {
 			$data = array_shift($data);
-			if($converter = $this->converter) $data = $converter($data, false);
+			if($converter = $this->converter){
+				$data = $converter($data);
+			}
 			return $data;
 		} else return null;
 	}
@@ -168,10 +165,15 @@ class Request {
 	 * @param int  $offset
 	 * @return mixed
 	 */
-	public function collectData($limit = null, $offset = 0) {
+	public function collectData($limit = null, $offset = null) {
 		$sql = $this->getSql();
-		if(!is_null($limit)) $sql .= ' LIMIT ' . $offset . ', ' . $limit;
-		return $this->dbAccess->getRows($sql);
+		if (!is_null($limit)) $sql .= ' LIMIT '.$limit;
+		if (!is_null($offset)) $sql .= ' OFFSET '.$offset;
+		if (!is_null($this->key)) {
+			return $this->dbAccess->getRowsWithKey($sql);
+		} else {
+			return $this->dbAccess->getRows($sql);
+		}
 	}
 
 	/**
@@ -182,7 +184,7 @@ class Request {
 	 */
 	public function collectPage($pageSize, $page, &$count) {
 		$data = $this->collectPageData($pageSize, $page, $count);
-		if($converter = $this->converter) $data = $converter($data, true);
+		if($converter = $this->converter) $data = array_map($converter, $data);
 		return $data;
 	}
 
@@ -210,8 +212,8 @@ class Request {
 	public function getSql() {
 		return
 			'SELECT ' .
+			((!is_null($this->key)) ? ($this->dbAccess->escapeSQLEntity($this->key).', ') : ('')) .
 			$this->select . ' ' .
-			(($this->keyField) ? (', ' . $this->keyField . ' AS __KEY__ ') : ('')) .
 			'FROM ' . $this->from . ' ' .
 			(($this->where != null) ? (' WHERE ' . $this->where->getSql($this->dbAccess) . ' ') : ('')) .
 			((count($this->order)) ? (' ORDER BY ' . join(', ', $this->order)) : (''));
@@ -227,4 +229,4 @@ class Request {
 		$sql = explode('ORDER BY', $sql);
 		return $this->dbAccess->getValue($sql[0]);
 	}
-} // End of class
+}

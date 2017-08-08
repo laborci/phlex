@@ -14,6 +14,8 @@ class PasswordField extends StringField {
 
 	public function getDataType(){return 'string';}
 
-	public function set($value) { return md5($this->salt.(string)$value); }
+	public function set($value) { return $this->hash($value); }
+
+	public function check($value, $hash){ return md5($this->salt.(string)$value) === $hash; }
 
 }

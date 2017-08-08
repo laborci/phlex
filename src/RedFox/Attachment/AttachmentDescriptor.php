@@ -1,5 +1,6 @@
 <?php namespace Phlex\RedFox\Attachment;
 
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 
@@ -39,11 +40,11 @@ class AttachmentDescriptor{
 	}
 
 	/**
-	 * @param \Symfony\Component\HttpFoundation\File\UploadedFile $upload
+	 * @param \Symfony\Component\HttpFoundation\File\File $upload
 	 *
 	 * @return bool
 	 */
-	public function isValidUpload(UploadedFile $upload){
+	public function isValidUpload(File $upload){
 		if($upload->getSize() > $this->maxFileSize) {
 			return false;
 		}
