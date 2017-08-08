@@ -45,10 +45,18 @@ class AttachmentDescriptor{
 	 * @return bool
 	 */
 	public function isValidUpload(File $upload){
+		
 		if($upload->getSize() > $this->maxFileSize) {
 			return false;
 		}
-		if(!is_null($this->acceptedExtensions) && !in_array($upload->getClientOriginalExtension(), $this->acceptedExtensions)){
+
+		if($upload instanceof UploadedFile){
+			$ext = $upload->getClientOriginalExtension();
+		}else{
+			$ext = $upload->getExtension();
+		}
+
+		if(!is_null($this->acceptedExtensions) && !in_array($ext, $this->acceptedExtensions)){
 			return false;
 		}
 		return true;
