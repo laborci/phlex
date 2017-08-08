@@ -18,7 +18,7 @@ class AttachmentDescriptor{
 	}
 
 	public function acceptExtensions(...$extensions){
-		$this->acceptedExtensions = $extensions;
+		$this->acceptedExtensions = array_map(function($ext){return strtolower($ext);}, $extensions);
 		return $this;
 	}
 
