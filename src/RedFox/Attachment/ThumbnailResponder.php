@@ -86,7 +86,7 @@ class ThumbnailResponder extends PageResponder {
 		$oAspect = $this->originalWidth / $this->originalHeight;
 		$width = $height * $oAspect;
 		$this->doResize($width, $height);
-		if($maxWidth != null and $width>$maxWidth) $this->doCrop($maxWidth, $height, $cropmode);
+		if($maxWidth != 0 and $width>$maxWidth) $this->doCrop($maxWidth, $height, $cropmode);
 	}
 
 	protected function width($op){
@@ -98,7 +98,7 @@ class ThumbnailResponder extends PageResponder {
 		$oAspect = $this->originalWidth / $this->originalHeight;
 		$height = $width / $oAspect;
 		$this->doResize($width, $height);
-		if($maxHeight !== 0 and $height>$maxHeight) $this->doCrop($width, $maxHeight, $cropmode);
+		if($maxHeight != 0 and $height>$maxHeight) $this->doCrop($width, $maxHeight, $cropmode);
 	}
 
 	protected function crop($op){

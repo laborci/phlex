@@ -2,6 +2,7 @@
 
 use App\Env;
 use Phlex\RedFox\Entity;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 
@@ -56,6 +57,21 @@ class AttachmentManager{
 			return false;
 		}else{
 			$upload->move($this->path, $upload->getClientOriginalName());
+			$this->attachments = null;
+			return true;
+		}
+	}
+
+	public function addFile(File $file){
+		if($this->getAttachmentCount() >= $this->descriptor->getMaxFileCount()) {
+			return false;
+		}elseif(!$this->descriptor->isValidUpload($file)) {
+			echo 'notvalid';
+			return false;
+		}else{
+			echo $file->getPath().'/'.$file->getFilename()."\n";
+			echo $this->path.$file->getFilename()."\n";
+			copy($file->getPath().'/'.$file->getFilename(), $this->path.$file->getFilename());
 			$this->attachments = null;
 			return true;
 		}

@@ -27,13 +27,14 @@ abstract class Environment {
 
 	protected function setPaths() {
 		$this->config['path_root'] = getenv('ROOT') . '/';
+		$this->config['path_public'] = getenv('ROOT') . '/public/';
 		$this->config['path_var'] = $this->config['path_root'] . 'var/';
 		$this->config['path_config'] = $this->config['path_root'] . 'config/';
 		$this->config['path_caches'] = $this->config['path_var'] . 'caches/';
 		$this->config['path_log'] =$this->config['path_var'] . 'log/';
 		$this->config['path_tmp'] = $this->config['path_var'] . 'tmp/';
-		$this->config['path_files'] = $this->config['path_var'] . 'files/';
-		$this->config['path_thumbnails'] = $this->config['path_var'] . 'thumbnails/';
+		$this->config['path_files'] = $this->config['path_public'] . 'files/';
+		$this->config['path_thumbnails'] = $this->config['path_public'] . 'thumbnails/';
 		$this->config['path_sessions'] = $this->config['path_var'] . 'sessions/';
 		$this->config['url_thumbnails'] = '/thumbnails/';
 		$this->config['url_files'] = '/files/';
