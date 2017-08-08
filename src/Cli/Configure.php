@@ -31,8 +31,12 @@ class Configure extends Command{
 		$localConf = str_replace('{{domain}}', $domain, $localConf);
 		$localConf = str_replace('{{path}}', $root, $localConf);
 		file_put_contents($root.'/config/local.conf', $localConf);
-
 		$style->success('💾  /config/local.conf');
+
+		$htaccess = file_get_contents(__DIR__.'/../../templates/config/htaccess.template');
+		$htaccess = str_replace('{{path}}', $root, $htaccess);
+		file_put_contents($root.'/public/.htaccess', $htaccess);
+		$style->success('💾  /public/.htaccess');
 
 		$style->section('Default database connection:');
 

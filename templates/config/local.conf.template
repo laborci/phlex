@@ -1,48 +1,13 @@
-
-<Directory {{path}}/var/files/>
-	<Files *>
-		AllowOverride None
-		SetHandler default-handler
-	</Files>
-</Directory>
-
-
 <VirtualHost *:80>
-
-    # answer any related subdomain
 	ServerName {{domain}}
 	ServerAlias *.{{domain}}
 
-	# the public folder - It contains the image, js, css assets, the favicon and the router itself
 	DocumentRoot "{{path}}/public/"
+	ErrorLog {{path}}/var/log/error.log
 
-#	Options -Indexes
-#	AllowOverride None
-
-	php_flag session.cookie_httponly on
-	ErrorLog {{path}}/var/log/apache_error.log
-	Alias /files/ {{path}}/var/files/
-	Alias /thumbnails/ {{path}}/var/thumbnails/
-
-	php_flag log_errors on
-	php_flag display_errors off
-	php_value error_reporting 2147483647
-	php_value error_log {{path}}/var/log/app.log
-
-	RewriteEngine on
-	UseCanonicalName on
-
-	Options +Indexes
-	Options +FollowSymlinks
-
-# --- thumbnail generator ---
-    RewriteCond %{REQUEST_URI} ^/thumbnails/(.+)
-    RewriteCond {{path}}/var/%{REQUEST_URI} !-f
-    RewriteRule ^(.*)$ /index.php [L]
-# --- index.php ---
-	RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-F
-	RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-d
-	RewriteCond %{REQUEST_URI} !^/?(\!?(thumbnails|files|img|css|js|plugin))/?(.*)
-	RewriteRule ^(.*)$ /index.php [L]
+    # You sholud allow overrides in this directory, or put content of .htaccess file here
+    <Directory {{path}}/public>
+        AllowOverride All
+    </Directory>
 
 </VirtualHost>
