@@ -51,11 +51,11 @@ class AttachmentManager{
 
 	public function uploadFile(UploadedFile $file) {
 		if($this->getAttachmentCount() >= $this->descriptor->getMaxFileCount()) {
-			throw new \Exception("Too many files", 1);
+			throw new Exception("Too many files", Exception::FILE_COUNT_ERROR);
 		}elseif( $file->getClientSize() > $this->descriptor->getMaxFileSize() ) {
-			throw new \Exception("Too big file", 1);
+			throw new Exception("Too big file", Exception::FILE_SIZE_ERROR);
 		}elseif( ! in_array($file->getClientOriginalExtension(), $this->descriptor->getAcceptedExtensions() )) {
-			throw new \Exception("File type is not accepted", 1);
+			throw new Exception("File type is not accepted", Exception::FILE_TYPE_ERROR);
 		}else{
 			$file->move($this->path, $file->getClientOriginalName());
 			$this->attachments = null;
@@ -65,11 +65,11 @@ class AttachmentManager{
 
 	public function addFile(File $file){
 		if($this->getAttachmentCount() >= $this->descriptor->getMaxFileCount()) {
-			throw new \Exception("Too many files", 1);
+			throw new Exception("Too many files", Exception::FILE_COUNT_ERROR);
 		}elseif( $file->getSize() > $this->descriptor->getMaxFileSize() ) {
-			throw new \Exception("Too big file", 1);
+			throw new Exception("Too big file", Exception::FILE_SIZE_ERROR);
 		}elseif( !in_array($file->getExtension(), $this->descriptor->getAcceptedExtensions()) ) {
-			throw new \Exception("File type is not accepted", 1);
+			throw new Exception("File type is not accepted", Exception::FILE_TYPE_ERROR);
 		}else{
 			copy($file->getPath().'/'.$file->getFilename(), $this->path.$file->getFilename());
 			$this->attachments = null;
