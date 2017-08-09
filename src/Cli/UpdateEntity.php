@@ -45,7 +45,6 @@ class UpdateEntity extends Command{
 		$missings = array_diff($fields, $model->getFields());
 		$unwanteds = array_diff($model->getFields(), $fields);
 
-		//$dir = Env::instance()->path_root.'App/Entity/'.$name;
 
 		$ref = new \ReflectionClass($class.'Model');
 		$fieldsMethod = $ref->getMethod('fields');
