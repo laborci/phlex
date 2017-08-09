@@ -47,11 +47,11 @@ abstract class Model {
 	abstract protected function fields();
 	abstract protected function relations();
 	abstract protected function attachments();
-	abstract protected function decorateFields();
+	protected function decorateFields(){}
 
 	#region Fields
 
-	public function hasField(string $name):bool { return array_key_exists($name, $this->fields); }
+	public function fieldExists(string $name):bool { return array_key_exists($name, $this->fields); }
 	/**
 	 * @param string $name
 	 * @param        $value
@@ -69,7 +69,7 @@ abstract class Model {
 
 	public function getFields():array { return array_keys($this->fields); }
 
-	public function addField(string $name, Field $field) { $this->fields[$name] = $field; }
+	public function hasField(string $name, Field $field) { $this->fields[$name] = $field; }
 	#endregion
 
 	#region Related Fields

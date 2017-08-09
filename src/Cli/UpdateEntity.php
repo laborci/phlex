@@ -62,7 +62,7 @@ class UpdateEntity extends Command{
 
 		if(count($unwanteds)) foreach ($body as $i => $line){
 			foreach ($unwanteds as $unwanted){
-				if(strpos($line, "\$this->addField('".$unwanted."'") === 0){
+				if(strpos($line, "\$this->hasField('".$unwanted."'") === 0){
 					$body[$i] = '//Deleted: '.$line;
 					$style->note("- $unwanted");
 				}
@@ -78,7 +78,7 @@ class UpdateEntity extends Command{
 			}
 			foreach ($missings as $missing) {
 				$field = $fieldinfo[$missing];
-				$newline = "\$this->addField('".$missing."', (new ".$this->fieldSelector($field['Type'], $missing)."(\"".$field['Type']."\"))";
+				$newline = "\$this->hasField('".$missing."', (new ".$this->fieldSelector($field['Type'], $missing)."(\"".$field['Type']."\"))";
 				$options = $access->getEnumValues($table, $missing);
 				if(count($options)){
 					$newline.="->setOptions(['".join("','", $options)."'])";

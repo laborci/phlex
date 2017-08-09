@@ -30,7 +30,7 @@ class Record {
 		}
 	}
 
-	public function hasField($name) { return $this->model->hasField($name); }
+	public function hasField($name) { return $this->model->fieldExists($name); }
 
 	protected function exportDirty(){
 		foreach(array_keys($this->dirtyFields) as $name){
