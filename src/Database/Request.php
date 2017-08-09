@@ -25,11 +25,17 @@ class Request {
 		$this->converter = $converter;
 	}
 
+	public function setConverter(\Closure $converter = null){
+		$this->converter = $converter;
+		return $this;
+	}
+
 #region initializers
+
 
 	/**
 	 * @param string $sql list of fields to retrieve
-	 * @param string $sqlParams
+	 * @param string[] $sqlParams
 	 * @return $this
 	 */
 	public function select(string $sql, ...$sqlParams) {
@@ -44,7 +50,7 @@ class Request {
 
 	/**
 	 * @param string $sql mostly the table name
-	 * @param string $sqlParams
+	 * @param string[] $sqlParams
 	 * @return $this
 	 */
 	public function from(string $sql, ...$sqlParams) {
@@ -56,8 +62,10 @@ class Request {
 	 * @param \Phlex\Database\Filter $filter
 	 * @return $this
 	 */
-	public function where(Filter $filter) {
-		$this->where = $filter;
+	public function where(Filter $filter = null) {
+		if(!is_null($filter)) {
+			$this->where = $filter;
+		}
 		return $this;
 	}
 	#endregion

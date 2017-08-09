@@ -78,11 +78,7 @@ abstract class Repository {
 	 * @return \Phlex\Database\Request
 	 */
 	protected function getDBRequest() {
-		$repository = $this;
-		return new Request(
-			$this->source->getAccess(),
-			function ($record){ return new $this->entityClass($record, $this); }
-		);
+		return new Request( $this->source->getAccess() );
 	}
 
 	/**
@@ -91,11 +87,11 @@ abstract class Repository {
 	 */
 	public function getSourceRequest(Filter $filter = null) {
 		$table = $this->source->getAccess()->escapeSQLEntity($this->source->getTable());
-		$request = $this->getDBRequest()->select($table.'.*')->from($table);
-		if(!is_null($filter)) {
-			$request->where($filter);
-		}
-		return $request;
+		return $this->getDBRequest()
+				->select($table.'.*')
+				->from($table)
+				->setConverter(function ($record){ return new $this->entityClass($record, $this); })
+				->where($filter);
 	}
 
 	protected function throwExceptionOnEmpty($items){

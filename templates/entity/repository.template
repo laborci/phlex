@@ -3,6 +3,7 @@
 /**
  * @method \App\Entity\{{name}}\{{name}} pick(int $id)
  * @method \App\Entity\{{name}}\{{name}}[] collect(array $id_list)
+ * @method \App\Entity\{{name}}\Request getSourceRequest(Filter $filter = null)
  */
 
 class {{name}}Repository extends \Phlex\RedFox\Repository{

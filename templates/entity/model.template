@@ -12,3 +12,12 @@ class {{name}}Model extends \Phlex\RedFox\Model{
 	protected function attachments(){}
 
 }
+
+
+/**
+ * @method \App\Entity\{{name}}\{{name}}[] collect($limit = null, $offset = null)
+ * @method \App\Entity\{{name}}\{{name}} pick()
+ */
+class Request extends \Phlex\Database\Request{
+    // no one uses this class, it exists for the IDE code completion
+}
