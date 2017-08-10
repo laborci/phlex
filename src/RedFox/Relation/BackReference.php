@@ -18,7 +18,7 @@ class BackReference {
 		$field = $this->field;
 		/** @var \Phlex\RedFox\Repository $repository */
 		$repository = $class::repository();
-		return $repository->getSourceRequest(Filter::where($field.'=$1', $object->id))->orderIf(!is_null($order), $order)->collect($limit, $offset);
+		return $repository->search(Filter::where($field.'=$1', $object->id))->orderIf(!is_null($order), $order)->collect($limit, $offset);
 	}
 
 

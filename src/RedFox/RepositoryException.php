@@ -9,6 +9,7 @@
 namespace Phlex\RedFox;
 
 
-class EmptyResultException extends \Exception {
-
+class RepositoryException extends \Exception {
+	const EMPTY_RESULT = 1;
+	const MISSING_RESULT = 2;
 }

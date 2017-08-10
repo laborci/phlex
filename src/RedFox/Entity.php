@@ -75,9 +75,6 @@ abstract class Entity {
 	public function __construct($data = null, Repository $repository = null) {
 		$this->repository = is_null($repository) ? static::repository() : $repository;
 		$this->record = new Record($this->model(), $data);
-		if($this->id){
-			$this->repository->getCache()->add($this);
-		}
 	}
 
 	public function setRepository(Repository $repository = null, $keepId = false){
