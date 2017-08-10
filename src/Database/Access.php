@@ -132,6 +132,6 @@ class Access {
 	public function deleteField(string $table, string $field):void { $this->execute("ALTER TABLE ".$this->escapeSQLEntity($table)." DROP ".$this->escapeSQLEntity($field)); }
 	public function getFieldList(string $table):array { return array_column($this->getFieldData($table), 'Field'); }
 	public function getFieldData(string $table):array { return $this->getRows("SHOW FULL COLUMNS FROM ".$this->escapeSQLEntity($table)); }
-	public function getEnumValues(string $tableName, string $field):array { preg_match_all("/'(.*?)'/", $this->getRows("DESCRIBE ".$this->escapeSQLEntity($tableName)." ".$this->quote($field))[0]['Type'], $matches); return $matches[1]; }
+	public function getEnumValues(string $table, string $field):array { preg_match_all("/'(.*?)'/", $this->getRows("DESCRIBE ".$this->escapeSQLEntity($table)." ".$this->quote($field))[0]['Type'], $matches); return $matches[1]; }
 	#endregion
 }
