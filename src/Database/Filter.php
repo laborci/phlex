@@ -25,9 +25,9 @@ class Filter {
 	 *
 	 * @return Filter
 	 */
-	static function whereIf($cond, $sql, ...$sqlParams) {
+	static function whereIf($condition, $sql, ...$sqlParams) {
 		$filter = new static();
-		if (!$cond)
+		if (!$condition)
 			return $filter;
 		return $filter->addWhere('WHERE', $sql, $sqlParams);
 	}
@@ -60,8 +60,8 @@ class Filter {
 	 *
 	 * @return $this
 	 */
-	function andIf($cond, $sql, ...$sqlParams) {
-		if (!$cond)
+	function andIf($condition, $sql, ...$sqlParams) {
+		if (!$condition)
 			return $this;
 		return $this->addWhere('AND', $sql, $sqlParams);
 	}
@@ -73,8 +73,8 @@ class Filter {
 	 *
 	 * @return $this
 	 */
-	function orIf($cond, $sql, ...$sqlParams) {
-		if (!$cond)
+	function orIf($condition, $sql, ...$sqlParams) {
+		if (!$condition)
 			return $this;
 		return $this->addWhere('OR', $sql, $sqlParams);
 	}
@@ -84,7 +84,7 @@ class Filter {
 	 *
 	 * @return string
 	 */
-	public function getSql(Access $db) {
+	public function getSql(Access $access) {
 		if (!$this->where)
 			return null;
 
@@ -92,13 +92,13 @@ class Filter {
 		foreach ($this->where as $filterSegment) {
 
 			if ($filterSegment['sql'] instanceof Filter)
-				$filterSegment['sql'] = $filterSegment['sql']->getSql($db);
+				$filterSegment['sql'] = $filterSegment['sql']->getSql($access);
 			else if (is_array($filterSegment['sql']))
-				$filterSegment['sql'] = $this->getSqlFromArray($filterSegment['sql'], $db);
+				$filterSegment['sql'] = $this->getSqlFromArray($filterSegment['sql'], $access);
 			if (trim($filterSegment['sql'])) {
 				if ($sql)
 					$sql .= " " . $filterSegment['type'] . " ";
-				$sql .= "(" . $db->buildSQL($filterSegment['sql'], $filterSegment['args']) . ")";
+				$sql .= "(" . $access->buildSQL($filterSegment['sql'], $filterSegment['args']) . ")";
 			}
 
 		}
@@ -114,14 +114,14 @@ class Filter {
 	 *
 	 * @return null
 	 */
-	protected function getSqlFromArray(array $filter, Access $db) {
+	protected function getSqlFromArray(array $filter, Access $access) {
 		if (!$filter)
 			return null;
 		$sql = array();
 		foreach ($filter as $key => $value) {
 			if (is_array($value))
-				$sql[] = $db->buildSQL(" `" . $key . "` IN ($1) ", $value);
-			else $sql[] = $db->buildSQL(" `" . $key . "` = $1 ", $value);
+				$sql[] = $access->buildSQL(" `" . $key . "` IN ($1) ", $value);
+			else $sql[] = $access->buildSQL(" `" . $key . "` = $1 ", $value);
 		}
 		return implode(' AND ', $sql);
 	}

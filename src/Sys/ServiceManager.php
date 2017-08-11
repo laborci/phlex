@@ -12,11 +12,11 @@ class ServiceManager{
 	protected static function instance() { return is_null(static::$instance) ? static::$instance = new static() : static::$instance; }
 	protected function __construct() {}
 
-	public static function bind($name, ...$for){ return static::instance()->bindService($name, ...$for); }
+	public static function bind($name, ...$for):ServiceFactory{ return static::instance()->bindService($name, ...$for); }
 	public static function get($name){ return static::instance()->getService($name); }
 
 
-	protected function bindService($name, ...$for){
+	protected function bindService($name, ...$for):ServiceFactory{
 		$service = new ServiceFactory($name);
 
 		if(count($for)){
