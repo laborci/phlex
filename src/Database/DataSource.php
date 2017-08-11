@@ -21,7 +21,7 @@ class DataSource{
 		$this->table = $table;
 	}
 
-	public function pick($id){
+	public function pick(int $id){
 		return $this->access->getRowById($this->table, $id);
 	}
 
@@ -33,11 +33,11 @@ class DataSource{
 		return $this->access->insert($this->table, $data);
 	}
 
-	public function update($id, array $data){
+	public function update(int $id, array $data){
 		return $this->access->updateById($this->table, $id, $data);
 	}
 
-	public function delete($id){
+	public function delete(int $id){
 		return $this->access->deleteById($this->table, $id);
 	}
 

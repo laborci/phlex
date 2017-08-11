@@ -46,7 +46,10 @@ abstract class Environment {
 		static::$instance->initialize();
 	}
 
-	public static function get($name){
+	public static function get(string $name = null){
+		if(is_null($name)){
+			return static::$instance->config;
+		}
 		if(!array_key_exists($name, static::$instance->config)) throw new \Exception("[$name] was not found in environment configuration");
 		return static::$instance->config[$name];
 	}

@@ -53,11 +53,11 @@ class Access {
 	public function getValues(string $sql, ...$sqlParams) { return $this->execute($sql, ...$sqlParams)->fetchAll(PDO::FETCH_COLUMN, 0); }
 
 	public function getRows(string $sql, ...$sqlParams) { return $this->execute($sql, ...$sqlParams)->fetchAll(PDO::FETCH_ASSOC); }
-	public function getValuesWithKey($sql, ...$sqlParams) { return $this->execute($sql, ...$sqlParams)->fetchAll(PDO::FETCH_KEY_PAIR); }
-	public function getRowsWithKey($sql, ...$sqlParams){ return $this->execute($sql, ...$sqlParams)->fetchAll(PDO::FETCH_UNIQUE|PDO::FETCH_ASSOC); }
+	public function getValuesWithKey(string $sql, ...$sqlParams) { return $this->execute($sql, ...$sqlParams)->fetchAll(PDO::FETCH_KEY_PAIR); }
+	public function getRowsWithKey(string $sql, ...$sqlParams){ return $this->execute($sql, ...$sqlParams)->fetchAll(PDO::FETCH_UNIQUE|PDO::FETCH_ASSOC); }
 
 	#region insert / update / delete
-	public function insert(string $table, array $data, bool $ignore = false) {
+	public function insert(string $table, array $data, bool $ignore = false):int {
 		foreach ($data as $key => $value){
 			if($key[0] === '!'){
 				$key = substr($key, 1);
@@ -96,8 +96,10 @@ class Access {
 	public function buildSQL(string $sql, array $sqlParams = []):string {
 		if(count($sqlParams)) {
 			foreach($sqlParams as $key => $param) {
-				$param = is_array($param) ? join(',', $this->quoteArray($param)) : $this->quote($param);
-				$sql = str_replace('$'.($key+1), $param, $sql);
+				$valueParam = is_array($param) ? join(',', $this->quoteArray($param)) : $this->quote($param);
+				$sql = str_replace('$'.($key+1), $valueParam, $sql);
+				$sqlEntityParam = $this->escapeSQLEntity($param);
+				$sql = str_replace('@'.($key+1), $sqlEntityParam, $sql);
 			}
 		}
 		return $sql;

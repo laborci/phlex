@@ -36,18 +36,22 @@ abstract class Entity {
 		return $model;
 	}
 
-	public function isExists(){ return (bool)$this->record->get('id'); }
-	public function isDeleted(){ return $this->deleted; }
+	public function isExists():bool { return (bool)$this->record->get('id'); }
+	public function isDeleted():bool { return $this->deleted; }
 
 	public function delete() {
 		if ($this->isExists()) {
 			if($this->onBeforeDelete() === false) return false;
 			$this->repository->delete($this);
+			$this->deleted = true;
 			$this->onDelete();
 		}
 	}
 
 	public function save(){
+		if($this->deleted){
+			$this->record->set('id', null, true);
+		}
 		if($this->isExists()){
 			return $this->update();
 		}else{
@@ -55,14 +59,14 @@ abstract class Entity {
 		}
 	}
 
-	public function update(){
+	private function update(){
 		if($this->onBeforeUpdate() === false) return false;
 		$this->repository->update($this);
 		$this->onUpdate();
 		return true;
 	}
 
-	public function insert(){
+	private function insert(){
 		if($this->onBeforeInsert() === false) return false;
 		$id = $this->repository->insert($this);
 		$this->id = $id;
