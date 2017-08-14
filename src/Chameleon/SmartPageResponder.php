@@ -4,65 +4,56 @@
 abstract class SmartPageResponder extends TRexPageResponder implements SmartPageComponentInterface {
 
 	private $serverData = array();
-	private $headerExtensions = [];
-	private $dependecyExtensions = [];
+	private $extensions = [];
 	private $loadedExtensions = [];
+	private $bodyClass = [];
 
 	protected $lang = 'hu';
 	protected $title = "Phlex:Chameleon";
 
-	protected function getServerData() { return $this->serverData; }
+	protected function addBodyClass(string $class){ $this->bodyClass[$class] = $class; }
+	protected function removeBodyClass(string $class){ unset($this->bodyClass[$class]); }
+	protected function getBodyClass(){return join(' ', $this->bodyClass); }
 
+	protected function getServerData() { return $this->serverData; }
+	protected function getServerDataJson() { return json_encode($this->serverData); }
 	protected function addServerData($key, $value) { $this->serverData[$key] = $value; }
 
 	public function addMeta($name, $content, $useProperty = false) { $this->headerExtensions[] = '<meta ' . $useProperty ? 'property' : 'name' . '="' . $name . '" content="' . $content . '" />'; }
 
-	public function addJsInclude($src, $code = false) {
+	public function addJsInclude( $src) {
 		if (!in_array($src, $this->loadedExtensions)) {
-			$this->dependecyExtensions[] = $code ? $src : '<script src="' . $src . '"></script>';
+			$this->extensions[] = '<script src="' . $src . '"></script>';
 			$this->loadedExtensions[] = $src;
 		}
 	}
 
 	public function addCssInclude($src) {
 		if (!in_array($src, $this->loadedExtensions)) {
-			if (!is_null($this->headerExtensions)) {
-				$this->headerExtensions['css-' . $src] = '<link rel="stylesheet" type="text/css" href="' . $src . '" />';
-			} else {
-				$this->dependecyExtensions['css-' . $src] = '<link rel="stylesheet" type="text/css" href="' . $src . '" />';
-			}
+			$this->extensions[] = '<link rel="stylesheet" type="text/css" href="' . $src . '" />';
 			$this->loadedExtensions[] = $src;
 		}
 	}
 
-	protected function writeDependencyExtensions() {
-		foreach ($this->dependecyExtensions as $dependecyExtension) {
-			echo $dependecyExtension . "\n";
-		}
-		$this->dependecyExtensions = null;
-	}
-
-	protected function writeHeaderExtensions() {
-		foreach ($this->headerExtensions as $headerExtension) {
-			echo $headerExtension . "\n";
-		}
+	protected function writeExtensions() {
+		foreach ($this->extensions as $extension) echo $extension . "\n";
 		$this->headerExtensions = null;
 	}
 
 	protected function template() {
 		?>
+		@var serverDataJson = $this->getServerDataJson();
+		@var bodyClass = $this->getBodyClass();
+
 		<!doctype html>
 		<html lang="{{.lang}}">
 		<head>
 			<?php $this->headTpl() ?>
-			@php $this->writeHeaderExtensions();
+			@php $this->writeExtensions();
+			<script> var serverData = {{serverDataJson}}; </script>
 		</head>
-		<body>
-		<?php $this->bodyTpl() ?>
-		@var serverDataJson = json_encode($this->getServerData());
-		<script> var serverData = {{serverDataJson}}; </script>
-		@php $this->writeDependencyExtensions();
-		@php $this->runScript();
+		<body class="{{bodyClass}}">
+			<?php $this->bodyTpl() ?>
 		</body>
 		</html>
 	<?php }
@@ -75,7 +66,4 @@ abstract class SmartPageResponder extends TRexPageResponder implements SmartPage
 	}
 
 	abstract protected function bodyTpl();
-
-	protected function runScript(){}
-
 }
