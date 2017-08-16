@@ -3,6 +3,7 @@
 class TRex{
 
 	protected $uses = [];
+	protected $ctns = null;
 
 	public static function parseString($string){
 		$parser = new TRex();
@@ -23,6 +24,7 @@ class TRex{
 			$line = trim($line);
 			if(strlen($line)){
 				if(substr($line, 0 ,1) == '@') {
+					$line = $this->parseLineCTNS($line);
 					$line = $this->parseLineUSE($line);
 					$line = $this->parseLinePHP($line);
 					$line = $this->parseLineVAR($line);
@@ -52,6 +54,11 @@ class TRex{
 			}
 
 		}
+
+		if(!is_null($this->ctns)){
+			$output = '<?php namespace '.$this->ctns.';?>'.$output;
+		}
+
 		if(count($this->uses)){
 			$uses = '<?php'."\n";
 			foreach ($this->uses as $use){
@@ -64,6 +71,14 @@ class TRex{
 	}
 
 	#region ONELINERS
+	protected function parseLineCTNS($line){
+		if(substr($line, 0, 5) == '@ctns'){
+			$this->ctns = str_replace('.','\\', trim(substr($line, 6), ". \t\n\r\0\x0B"));
+			$line = '';
+		}
+		return $line;
+	}
+
 	protected function parseLineUSE($line){
 		if(substr($line, 0, 4) == '@use'){
 			$this->uses[] = trim(str_replace('.','\\',substr($line, 4)));

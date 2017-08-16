@@ -41,6 +41,7 @@ abstract class SmartPageResponder extends TRexPageResponder implements SmartPage
 	}
 
 	protected function template() {
+		$this->setCustomtagNamespace();
 		?>
 		@var serverDataJson = $this->getServerDataJson();
 		@var bodyClass = $this->getBodyClass();
@@ -49,8 +50,8 @@ abstract class SmartPageResponder extends TRexPageResponder implements SmartPage
 		<html lang="{{.lang}}">
 		<head>
 			<?php $this->headTpl() ?>
-			@php $this->writeExtensions();
 			<script> var serverData = {{serverDataJson}}; </script>
+			@php $this->writeExtensions();
 		</head>
 		<body class="{{bodyClass}}">
 			<?php $this->bodyTpl() ?>
@@ -66,4 +67,11 @@ abstract class SmartPageResponder extends TRexPageResponder implements SmartPage
 	}
 
 	abstract protected function bodyTpl();
+
+	protected function customtagNamespace(){return null;}
+
+	private function setCustomtagNamespace(){
+		$ns = $this->customtagNamespace();
+		if(!is_null($ns)) echo '@ctns '.str_replace('.','\\',$ns)."\n";
+	}
 }
