@@ -6,7 +6,7 @@ class TRex{
 	protected $ctns = null;
 
 	public static function parseString($string){
-		$parser = new TRex();
+		$parser = new static();
 		$output = $parser->parse($string);
 		$lines = explode("\n", $output);
 		$output = '';
@@ -16,7 +16,7 @@ class TRex{
 		return $output;
 	}
 
-	public function parse($string){
+	protected function parse($string){
 		$lines = explode("\n", $string);
 		$output = '';
 
@@ -219,14 +219,14 @@ class TRex{
 		return $line;
 	}
 
-	function parseLineWITH($line){
+	protected function parseLineWITH($line){
 		if(preg_match('/^@with\s+(.*?)$/', $line, $matches)){
 			$line = '<?php break; case '.$this->parseVALUE($matches[1]).': ?>';
 		}
 		return $line;
 	}
 
-	function parseLineDEFAULT($line){
+	protected function parseLineDEFAULT($line){
 		if($line == '@default'){
 			$line = '<?php break; default: ?>';
 		}

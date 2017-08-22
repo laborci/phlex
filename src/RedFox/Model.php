@@ -6,6 +6,8 @@ use Phlex\RedFox\Attachment\AttachmentManager;
 use Phlex\RedFox\Relation\BackReference;
 use Phlex\RedFox\Relation\CrossReference;
 use Phlex\RedFox\Relation\Reference;
+use Phlex\RedFox\Relation\UniqueBackReference;
+
 
 abstract class Model {
 
@@ -78,6 +80,9 @@ abstract class Model {
 	}
 	protected function hasMany($name, $class, $field) {
 		$this->relations[$name] = new BackReference($class, $field);
+	}
+	protected function hasOne($name, $class, $field) {
+		$this->relations[$name] = new UniqueBackReference($class, $field);
 	}
 	protected function connectedTo($name, DataSource $dataSource, $class, $selfField, $otherField) {
 		$this->relations[$name] = new CrossReference($dataSource, $class, $selfField, $otherField);

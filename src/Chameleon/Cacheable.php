@@ -1,10 +1,5 @@
-<?php
+<?php namespace Phlex\Chameleon;
 
-namespace Phlex\Chameleon;
-
-
-use App\Env;
-use Phlex\RedFox\Cache;
 use Phlex\Sys\ServiceManager;
 
 
@@ -14,10 +9,14 @@ trait Cacheable {
 
 	private $responseCache;
 
+	private function cacheKey(){
+		return str_replace('\\', '_',$this->getCacheKey());
+	}
+
 	public function __invoke() {
 		/** @var \Phlex\Sys\FileCache $cache */
 		$cache = ServiceManager::get('cache.response');
-		$key = $this->getCacheKey();
+		$key = $this->cacheKey();
 		$this->beforeCacheHandler();
 
 		if ($cache->exists($key) && $this->isCacheValid($key)) {
@@ -34,7 +33,7 @@ trait Cacheable {
 
 	protected function beforeCacheHandler() { }
 
-	protected function getCacheKey(): string { return str_replace('\\', '_', get_class($this)); }
+	protected function getCacheKey(): string { return  get_class($this); }
 
 	protected function getCacheInvalidationTime(): int { return 180; }
 
@@ -48,7 +47,7 @@ trait Cacheable {
 	protected function invalidateCache(){
 		/** @var \Phlex\Sys\FileCache $cache */
 		$cache = ServiceManager::get('cache.response');
-		$key = $this->getCacheKey();
+		$key = $this->cacheKey();
 		$cache->delete($key);
 	}
 }

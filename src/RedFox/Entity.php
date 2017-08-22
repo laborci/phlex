@@ -97,6 +97,19 @@ abstract class Entity {
 
 	private $attachmentManagers = [];
 
+	/**
+	 * @param $group
+	 *
+	 * @return \Phlex\RedFox\Attachment\AttachmentManager
+	 */
+	public function getAttachmentManager($group){
+		if(static::model()->isAttachmentGroupExists($group)){
+			return static::model()->getAttachmentManager($group, $this);
+		}else{
+			return null;
+		}
+	}
+
 	public function __get($name) {
 		if(method_exists($this, $method = '__get'.ucfirst($name))){
 			return $this->$method();
@@ -107,8 +120,7 @@ abstract class Entity {
 		}else if(array_key_exists($name, $this->attachmentManagers)){
 			return $this->attachmentManagers[$name];
 		}else if(static::model()->isAttachmentGroupExists($name)){
-			$this->attachmentManagers[$name] = static::model()->getAttachmentManager($name, $this);
-			return $this->attachmentManagers[$name];
+			return static::model()->getAttachmentManager($name, $this);
 		}
 		return null;
 	}

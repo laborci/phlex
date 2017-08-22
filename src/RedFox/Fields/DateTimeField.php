@@ -16,7 +16,7 @@ class DateTimeField extends Field {
 	public function export($value) { return $value->format('Y-m-d H:i:s'); }
 
 	public function set($value) {
-		if(get_class($value) !== '\DateTime') {
+		if(get_class($value) !== \DateTime::class) {
 			throw new \Exception('DateTime Field type set error');
 		}
 		return $value;

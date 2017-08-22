@@ -89,8 +89,11 @@ class Request {
 
 	public function collectData($limit = null, $offset = null):array {
 		$sql = $this->getSql();
-		if (!is_null($limit)) $sql .= ' LIMIT '.$limit;
-		if (!is_null($offset)) $sql .= ' OFFSET '.$offset;
+		if (!is_null($limit)) {
+			$sql .= ' LIMIT ' . $limit;
+			if (!is_null($offset))
+				$sql .= ' OFFSET ' . $offset;
+		}
 		if (!is_null($this->key)) {
 			return $this->access->getRowsWithKey($sql);
 		} else {
