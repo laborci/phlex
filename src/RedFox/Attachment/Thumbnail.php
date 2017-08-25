@@ -6,6 +6,16 @@ namespace Phlex\RedFox\Attachment;
 use App\Env;
 
 
+/**
+ * Class Thumbnail
+ * @package Phlex\RedFox\Attachment
+ *
+ * @property string $png
+ * @property string $jpg
+ * @property string $gif
+ * @property string $url
+ */
+
 class Thumbnail {
 
 	/** @var \Phlex\RedFox\Attachment\Attachment */

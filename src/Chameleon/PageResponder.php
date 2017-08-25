@@ -1,15 +1,6 @@
 <?php namespace Phlex\Chameleon;
 
 
-use App\Env;
-use Phlex\Routing\Request;
-use Phlex\Routing\Router;
-use Symfony\Component\HttpFoundation\FileBag;
-use Symfony\Component\HttpFoundation\HeaderBag;
-use Symfony\Component\HttpFoundation\ParameterBag;
-use Symfony\Component\HttpFoundation\ServerBag;
-
-
 abstract class PageResponder extends Responder {
 
 	private $httpResponseCode = 200;
