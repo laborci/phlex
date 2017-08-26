@@ -2,16 +2,15 @@
 
 use Symfony\Component\HttpFoundation\ParameterBag;
 
-abstract class JsonResponder extends PageResponder{
+abstract class JsonResponder extends Responder{
 
-	protected $data;
 
 	final public function __invoke() {
-		$this->addResponseHeader('Content-Type', 'application/json');
-		parent::__invoke();
+		$this->getResponse()->headers->set('Content-Type', 'application/json');
+		$this->getResponse()->setContent(json_encode($this->json()))->send();
 	}
 
-	final protected function respond(){	echo json_encode($this->data); }
+	abstract protected function json();
 	final protected function getJsonPayload(): array { return json_decode($this->getRequest()->getContent(), true); }
 	final protected function getJsonParamBag(): ParameterBag { return new ParameterBag(json_decode($this->getRequest()->getContent(), true)); }
 }

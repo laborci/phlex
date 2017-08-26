@@ -1,6 +1,7 @@
 <?php namespace Phlex\Chameleon;
 
 use Phlex\Routing\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Phlex\Sys\ServiceManager;
 use Symfony\Component\HttpFoundation\FileBag;
 use Symfony\Component\HttpFoundation\HeaderBag;
@@ -12,10 +13,19 @@ abstract class Responder{
 
 	/** @var \Phlex\Routing\Request  */
 	private $request;
+	/** @var  \Symfony\Component\HttpFoundation\Response */
+	private $response;
 
-	public function __construct() { $this->request = ServiceManager::get('Request'); }
+	public function __construct() {
+		$this->request = ServiceManager::get('Request');
+		$this->response = ServiceManager::get('Response');
+	}
+
+	abstract function __invoke();
 
 	protected function getRequest(): Request { return $this->request; }
+	protected function getResponse(): Response { return $this->response; }
+	protected function setResponse(Response $response) { $this->response = $response; }
 	protected function getRequestBag(): ParameterBag { return $this->getRequest()->request; }
 	protected function getQueryBag(): ParameterBag { return $this->getRequest()->query; }
 	protected function getPathBag(): ParameterBag { return $this->getRequest()->pathParams; }

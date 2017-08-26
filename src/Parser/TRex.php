@@ -290,6 +290,13 @@ class TRex{
 
 	protected function parseVALUE($value){
 		$value = trim($value);
+		if(substr($value, 0, 1) === '!'){
+			$prefix = '!';
+			$value = substr($value, 1);
+		}else{
+			$prefix = '';
+		}
+		
 		$firstChar = substr($value, 0, 1);
 		$firstTwoChar = substr($value, 0, 2);
 		if($firstChar == "'" || $firstChar == '"' || is_numeric($value)){
@@ -303,7 +310,7 @@ class TRex{
 		}else{
 			$realValue = '$'.$this->parseVarIndex($value);
 		}
-		return $realValue;
+		return $prefix . $realValue;
 	}
 
 	protected function parseVarIndex($var){

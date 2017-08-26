@@ -1,30 +1,23 @@
 <?php namespace Phlex\Chameleon;
 
 
+use Symfony\Component\HttpFoundation\Response;
+
+
 abstract class PageResponder extends Responder {
 
-	private $httpResponseCode = 200;
-	private $responseHeaders = [];
+	public function __construct() {
+		parent::__construct();
+	}
 
 	public function __invoke() {
 		$this->prepare();
-		register_shutdown_function([$this, 'shutDown']);
-		$this->sendHeaders();
-		$this->respond();
+		if(method_exists($this, 'shutDown')){
+			register_shutdown_function([$this, 'shutDown']);
+		}
+		$this->getResponse()->setContent($this->respond())->send();
 	}
 
 	abstract protected function prepare();
-
-	abstract protected function respond();
-
-	protected function sendHeaders() {
-		http_response_code($this->httpResponseCode);
-		foreach ($this->responseHeaders as $header => $value) {
-			header($header . ': ' . $value);
-		}
-	}
-
-	protected function addResponseHeader(string $name, string $value) { $this->responseHeaders[$name] = $value; }
-	protected function setHttpResponseCode(int $code) { $this->httpResponseCode = $code; }
-	public function shutDown(){}
+	abstract protected function respond():string;
 }

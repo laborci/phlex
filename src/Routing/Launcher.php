@@ -2,6 +2,7 @@
 
 use Phlex\Sys\ServiceManager;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 
 class Launcher {
@@ -30,6 +31,7 @@ class Launcher {
 		$logger->info($request->getHost().$request->getRequestUri(), ['method'=>$request->getMethod()]);
 
 		ServiceManager::bind('Request')->value($request);
+		ServiceManager::bind('Response')->value(new Response());
 		$launcher($request);
 	}
 

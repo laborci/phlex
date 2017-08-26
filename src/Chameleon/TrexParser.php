@@ -9,8 +9,8 @@ use Phlex\Sys\ServiceManager;
 trait TrexParser {
 
 	final protected function respondTemplate($method = 'template') {
-
 		$key = str_replace('\\', '_', get_class($this)) . '-' . $method;
+		/** @var \Phlex\Sys\FileCache $templateCache */
 		$templateCache = ServiceManager::get('cache.template');
 
 		if (!$templateCache->exists($key) || $this->isDevAndDirty($key)) {
@@ -21,8 +21,9 @@ trait TrexParser {
 			$output = TRex::parseString($template);
 			$templateCache->set($key, $output);
 		}
-
+		ob_start();
 		include $templateCache->file($key);
+		return ob_get_clean();
 	}
 
 	final protected function isDevAndDirty($key) {

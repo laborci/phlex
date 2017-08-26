@@ -37,6 +37,10 @@ abstract class AuthService implements InjectDependencies, AuthServiceInterface {
 		}
 	}
 
+	public function authenticateUserId(int $userId){
+		$this->container->setUserId($userId);
+	}
+
 	abstract public function getUser();
 	abstract protected function findUser($login) : AuthenticableInterface;
 

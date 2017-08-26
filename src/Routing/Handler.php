@@ -2,6 +2,7 @@
 
 use Phlex\Chameleon\Middleware;
 use Phlex\Chameleon\PageResponder;
+use Phlex\Chameleon\Responder;
 use Phlex\Sys\ServiceManager;
 
 
@@ -26,7 +27,8 @@ final class Handler {
 	protected function runMiddleware($middlewareClass, $attributes) {
 		$this->request->attributes->replace($attributes);
 		$middleware = $this->createMiddleware($middlewareClass);
-		$middleware(next($this->pipeline));
+		$middleware->setNext( next($this->pipeline) );
+		$middleware();
 	}
 
 	protected function runResponder($responderClass, $attributes) {
@@ -97,7 +99,7 @@ final class Handler {
 		return ServiceManager::get($middlewareClass);
 	}
 
-	private function createResponder($responderClass): PageResponder {
+	private function createResponder($responderClass): Responder {
 		return ServiceManager::get($responderClass);
 	}
 

@@ -54,7 +54,7 @@ abstract class Customtag implements SmartPageComponentInterface {
 	 */
 	final protected function getAttributeParamBag(): ParameterBag { return $this->attributes; }
 
-	protected function respond() { $this->respondTemplate('tag'); }
+	protected function respond() { echo $this->respondTemplate('tag'); }
 
 	abstract protected function tag();
 }

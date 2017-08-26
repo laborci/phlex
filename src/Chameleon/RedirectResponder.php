@@ -1,19 +1,25 @@
 <?php namespace Phlex\Chameleon;
 
-abstract class RedirectResponder extends PageResponder {
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
+abstract class RedirectResponder extends Responder {
 
-	 public function __invoke() {
-		 register_shutdown_function([$this, 'shutDown']);
-		 $redirect = $this->redirect();
-		 $this->sendHeaders();
-		 header('Location:' . $redirect);
-		 die();
-	 }
+	public function __construct() {
+		parent::__construct();
+		$this->setResponse( new RedirectResponse('/', 302, $this->getResponse()->headers->all()) );
+	}
 
-	 abstract protected function redirect():string;
+	public function __invoke() {
+		if(method_exists($this, 'shutDown')){
+			register_shutdown_function([$this, 'shutDown']);
+		}
+		/** @var RedirectResponse $response */
+		$response = $this->getResponse();
+		$response->setTargetUrl( $this->redirect() )->send();
+	}
 
-	 protected final function prepare() {}
-
-	 protected final function respond() {}
+	/**
+	 * @return string the redirect url
+	 */
+	abstract protected function redirect():string;
  }
