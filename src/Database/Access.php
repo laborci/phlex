@@ -97,9 +97,11 @@ class Access {
 		if(count($sqlParams)) {
 			foreach($sqlParams as $key => $param) {
 				$valueParam = is_array($param) ? join(',', $this->quoteArray($param)) : $this->quote($param);
-				$sql = str_replace('$'.($key+1), $valueParam, $sql);
-				$sqlEntityParam = $this->escapeSQLEntity($param);
-				$sql = str_replace('@'.($key+1), $sqlEntityParam, $sql);
+				$sql = str_replace('$' . ($key + 1), $valueParam, $sql);
+				if (!is_array($param)) {
+					$sqlEntityParam = $this->escapeSQLEntity($param);
+					$sql = str_replace('@' . ($key + 1), $sqlEntityParam, $sql);
+				}
 			}
 		}
 		return $sql;
