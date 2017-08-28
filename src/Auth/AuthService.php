@@ -1,25 +1,26 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: elvis
- * Date: 2017. 07. 11.
- * Time: 7:33
- */
-
-namespace Phlex\Auth;
-
+<?php namespace Phlex\Auth;
 
 use Phlex\Sys\InjectDependencies;
 
 abstract class AuthService implements InjectDependencies, AuthServiceInterface {
 
 	protected $container;
+	protected $isAuthenticated;
 
 	public function __construct(AuthContainerInterface $container){
 		$this->container = $container;
+		if(!$container->getUserId()) return false;
+
+		$user = $this->getUser();
+		$this->isAuthenticated = !is_null($user) && $this->validateUser($user);
+		if (!$this->validateUser($user)){
+			$container->forget();
+		}
 	}
 
-	public function isAuthenticated(): bool { return $this->container->hasUserId(); }
+	public function isAuthenticated(): bool {
+		return $this->isAuthenticated;
+	}
 
 	public function logout(){ $this->container->forget(); }
 
@@ -30,6 +31,14 @@ abstract class AuthService implements InjectDependencies, AuthServiceInterface {
 			return false;
 		}
 		if($user->checkPassword($password)){
+			return $this->authenticateUser($user);
+		}else{
+			return false;
+		}
+	}
+
+	public function authenticateUser(AuthenticableInterface $user):bool{
+		if($this->validateUser($user)){
 			$this->container->setUserId($user->getId());
 			return true;
 		}else{
@@ -37,11 +46,8 @@ abstract class AuthService implements InjectDependencies, AuthServiceInterface {
 		}
 	}
 
-	public function authenticateUserId(int $userId){
-		$this->container->setUserId($userId);
-	}
-
 	abstract public function getUser();
 	abstract protected function findUser($login) : AuthenticableInterface;
+	abstract protected function validateUser($user):bool;
 
 }

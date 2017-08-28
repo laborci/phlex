@@ -110,7 +110,10 @@ class AttachmentManager{
 		$attachments = $this->getAttachments();
 		switch ($name){
 			case 'files': return $attachments; break;
-			case 'first': return reset($attachments); break;
+			case 'first':
+				if($this->hasAttachments()) return reset($attachments);
+				else return null;
+				break;
 		}
 	}
 

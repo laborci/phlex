@@ -3,7 +3,7 @@
 use Phlex\Chameleon\Middleware;
 use Phlex\Chameleon\PageResponder;
 use Phlex\Chameleon\Responder;
-use Phlex\Sys\ServiceManager;
+use App\ServiceManager;
 
 
 final class Handler {

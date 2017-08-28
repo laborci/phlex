@@ -68,7 +68,13 @@ class Request {
 
 	#endregion
 
-	public function collect($limit = null, $offset = null):array {
+	/**
+	 * @param null $limit
+	 * @param null $offset
+	 *
+	 * @return array
+	 */
+	public function collect($limit = null, $offset = null) {
 		$data = $this->collectData($limit, $offset);
 		if($converter = $this->converter) {
 			$data = array_map($converter, $data);

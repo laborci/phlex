@@ -1,6 +1,5 @@
 <?php namespace Phlex\Sys;
 
-
 abstract class Environment {
 
 	/** @var  static */
@@ -21,8 +20,8 @@ abstract class Environment {
 	}
 
 	protected function initialize(){
-		ServiceManager::bind('cache.template')->sharedService(FileCache::class, $this->config['path_caches'].'templates', 'phtml');
-		ServiceManager::bind('cache.response')->sharedService(FileCache::class, $this->config['path_caches'].'responses', 'phtml');
+		\App\ServiceManager::bind('cache.template')->sharedService(FileCache::class, $this->config['path_caches'].'templates', 'phtml');
+		\App\ServiceManager::bind('cache.response')->sharedService(FileCache::class, $this->config['path_caches'].'responses', 'phtml');
 	}
 
 	protected function setPaths() {

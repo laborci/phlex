@@ -3,7 +3,7 @@
 
 use App\Env;
 use Phlex\Parser\TRex;
-use Phlex\Sys\ServiceManager;
+use App\ServiceManager;
 
 
 trait TrexParser {

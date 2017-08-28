@@ -2,7 +2,7 @@
 
 use Phlex\Routing\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Phlex\Sys\ServiceManager;
+use App\ServiceManager;
 use Symfony\Component\HttpFoundation\FileBag;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
