@@ -1,6 +1,6 @@
 <?php namespace Phlex\Chameleon;
 
-use Phlex\Sys\ServiceManager;
+use App\ServiceManager;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 

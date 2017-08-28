@@ -1,9 +1,6 @@
-<?php
+<?php namespace Phlex\Sys;
 
-namespace Phlex\Sys;
-
-
-class ServiceManager{
+abstract class ServiceManager{
 
 	private $services = [];
 	private $servicesInContext = [];

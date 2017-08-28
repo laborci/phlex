@@ -1,6 +1,6 @@
 <?php namespace Phlex\Database;
 
-use Phlex\Sys\ServiceManager;
+use App\ServiceManager;
 
 class DataSource{
 

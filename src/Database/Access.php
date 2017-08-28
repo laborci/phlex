@@ -1,7 +1,7 @@
 <?php namespace Phlex\Database;
 
 use PDO;
-use Phlex\Sys\ServiceManager;
+use App\ServiceManager;
 use Psr\Log\LoggerInterface;
 
 

@@ -6,6 +6,6 @@ interface AuthServiceInterface {
 	public function authenticate($login, $password): bool;
 	public function getUser();
 	public function logout();
-	public function authenticateUserId(int $userId);
+	public function authenticateUser(AuthenticableInterface $user):bool;
 
 }

@@ -1,6 +1,6 @@
 <?php namespace Phlex\Routing;
 
-use Phlex\Sys\ServiceManager;
+use App\ServiceManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
