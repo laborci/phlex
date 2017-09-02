@@ -3,7 +3,7 @@
 /**
  * Class Request
  */
-class Request {
+class Finder {
 
 	/** @var \Phlex\Database\Access */
 	protected $access;
@@ -25,27 +25,27 @@ class Request {
 		$this->converter = $converter;
 	}
 
-	public function setConverter(\Closure $converter = null):Request{
+	public function setConverter(\Closure $converter = null):Finder{
 		$this->converter = $converter;
 		return $this;
 	}
 
-	public function key(string $key):Request  {
+	public function key(string $key):Finder  {
 		$this->key = $key;
 		return $this;
 	}
 
-	public function select(string $sql, ...$sqlParams):Request  {
+	public function select(string $sql, ...$sqlParams):Finder  {
 		$this->select = $this->access->buildSQL($sql . ' ', $sqlParams);
 		return $this;
 	}
 
-	public function from(string $sql, ...$sqlParams):Request  {
+	public function from(string $sql, ...$sqlParams):Finder  {
 		$this->from = $this->access->buildSQL($sql . ' ', $sqlParams);
 		return $this;
 	}
 
-	public function where(Filter $filter = null):Request  {
+	public function where(Filter $filter = null):Finder  {
 		if(!is_null($filter)) {
 			$this->where = $filter;
 		}
@@ -54,17 +54,17 @@ class Request {
 
 	#region order
 
-	function order($order):Request {
+	function order($order):Finder {
 		if(is_array($order)) foreach($order as $field => $dir) $this->order[] = $this->access->escapeSQLEntity($field).' '.$dir;
 		else $this->order[] = $order;
 		return $this;
 	}
 
-	function asc($field):Request { return $this->order($this->access->escapeSQLEntity($field) . ' ASC'); }
-	function desc($field):Request { return $this->order($this->access->escapeSQLEntity($field) . ' DESC'); }
-	function ascIf(bool $cond, string $field):Request { return $cond ? $this->asc($field) : $this; }
-	function descIf(bool $cond, string $field):Request { return $cond ? $this->desc($field) : $this; }
-	function orderIf(bool $cond, $order):Request { return $cond ? $this->order($order) : $this; }
+	function asc($field):Finder { return $this->order($this->access->escapeSQLEntity($field) . ' ASC'); }
+	function desc($field):Finder { return $this->order($this->access->escapeSQLEntity($field) . ' DESC'); }
+	function ascIf(bool $cond, string $field):Finder { return $cond ? $this->asc($field) : $this; }
+	function descIf(bool $cond, string $field):Finder { return $cond ? $this->desc($field) : $this; }
+	function orderIf(bool $cond, $order):Finder { return $cond ? $this->order($order) : $this; }
 
 	#endregion
 

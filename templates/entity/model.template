@@ -19,9 +19,8 @@ class {{name}}Model extends \Phlex\RedFox\Model{
 
 
 /**
+ * Nobody uses this class, it exists only to help the IDE code completion
  * px: @method \App\Entity\{{name}}\{{name}}[] collect($limit = null, $offset = null)
  * px: @method \App\Entity\{{name}}\{{name}} pick()
  */
-class Request extends \Phlex\Database\Request{
-    // no one uses this class, it exists only to help the IDE code completion
-}
+class Finder extends \Phlex\Database\Finder{}

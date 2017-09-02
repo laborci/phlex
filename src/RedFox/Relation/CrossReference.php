@@ -2,7 +2,7 @@
 
 use Phlex\Database\DataSource;
 use Phlex\Database\Filter;
-use Phlex\Database\Request;
+use Phlex\Database\Finder;
 use Phlex\RedFox\Entity;
 
 class CrossReference {
@@ -23,7 +23,7 @@ class CrossReference {
 
 	public function __invoke(Entity $object) {
 		$class = $this->class;
-		$req = new Request($this->access);
+		$req = new Finder($this->access);
 		$req->select($this->otherField . " as __VALUE__")->from($this->table)->where(Filter::where('`' . $this->selfField . '`=$1', $object->id));
 		$rels = $req->collect();
 		return $class::repository()->collect($rels);

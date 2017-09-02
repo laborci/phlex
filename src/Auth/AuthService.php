@@ -9,12 +9,14 @@ abstract class AuthService implements InjectDependencies, AuthServiceInterface {
 
 	public function __construct(AuthContainerInterface $container){
 		$this->container = $container;
-		if(!$container->getUserId()) return false;
-
-		$user = $this->getUser();
-		$this->isAuthenticated = !is_null($user) && $this->validateUser($user);
-		if (!$this->validateUser($user)){
-			$container->forget();
+		if(!$container->hasUserId()){
+			$this->isAuthenticated = false;
+		}else {
+			$user = $this->getUser();
+			$this->isAuthenticated = !is_null($user) && $this->validateUser($user);
+			if (!$this->validateUser($user)) {
+				$container->forget();
+			}
 		}
 	}
 
@@ -40,6 +42,7 @@ abstract class AuthService implements InjectDependencies, AuthServiceInterface {
 	public function authenticateUser(AuthenticableInterface $user):bool{
 		if($this->validateUser($user)){
 			$this->container->setUserId($user->getId());
+			$this->isAuthenticated = true;
 			return true;
 		}else{
 			return false;

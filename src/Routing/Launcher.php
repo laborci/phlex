@@ -26,9 +26,7 @@ class Launcher {
 		/** @var Request $request */
 		$request = Request::createFromGlobals();
 
-		/** @var \Psr\Log\LoggerInterface $logger */
-		$logger = ServiceManager::get(LoggerInterface::class);
-		$logger->info($request->getHost().$request->getRequestUri(), ['method'=>$request->getMethod()]);
+		ServiceManager::getLogger()->request($request->getMethod(), $request->getHost().$request->getRequestUri());
 
 		ServiceManager::bind('Request')->value($request);
 		ServiceManager::bind('Response')->value(new Response());

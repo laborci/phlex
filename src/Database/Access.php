@@ -2,7 +2,6 @@
 
 use PDO;
 use App\ServiceManager;
-use Psr\Log\LoggerInterface;
 
 
 class Access {
@@ -10,12 +9,11 @@ class Access {
 	private $connection;
 	/** @var string */
 	private $database;
-	/** @var  LoggerInterface */
 	private $logger;
 
 	public function __construct($connectionUrl) {
 
-		$this->logger = ServiceManager::get(LoggerInterface::class);
+		$this->logger = ServiceManager::getLogger();
 
 		$url = parse_url($connectionUrl);
 		parse_str($url['query'], $options);
@@ -38,7 +36,7 @@ class Access {
 
 	private function execute($sql, ...$sqlParams) {
 		$sql = $this->buildSQL($sql, $sqlParams);
-		if(!is_null($this->logger)) $this->logger->debug($sql, ['method'=>debug_backtrace()[1]['function']]);
+		if(!is_null($this->logger)) $this->logger->sql($sql, debug_backtrace()[1]['function']);
 		return $this->connection->query($sql);
 	}
 

@@ -1,9 +1,5 @@
 <?php namespace Phlex\Chameleon;
 
-
-use Symfony\Component\HttpFoundation\Response;
-
-
 abstract class PageResponder extends Responder {
 
 	public function __construct() {

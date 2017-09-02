@@ -3,7 +3,7 @@
 /**
  * px: @method \App\Entity\{{name}}\{{name}} pick(int $id, bool $strict = true)
  * px: @method \App\Entity\{{name}}\{{name}}[] collect(array $id_list, bool $strict = true)
- * px: @method \App\Entity\{{name}}\Request getSourceRequest(\Phlex\Database\Filter $filter = null)
+ * px: @method \App\Entity\{{name}}\Finder search(\Phlex\Database\Filter $filter = null)
  */
 
 class {{name}}Repository extends \Phlex\RedFox\Repository{

@@ -11,7 +11,7 @@ use Phlex\RedFox\Relation\BackReference;
  * @property-read int $id
  */
 
-abstract class Entity {
+abstract class Entity implements \JsonSerializable {
 
 	/** @var  Record */
 	private $record;
@@ -149,6 +149,10 @@ abstract class Entity {
 
 	function getId(){
 		return $this->id;
+	}
+
+	function jsonSerialize(){
+		return $this->getRawData();
 	}
 
 }

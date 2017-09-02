@@ -2,7 +2,7 @@
 
 use Phlex\Database\DataSource;
 use Phlex\Database\Filter;
-use Phlex\Database\Request;
+use Phlex\Database\Finder;
 
 abstract class Repository {
 
@@ -84,7 +84,7 @@ abstract class Repository {
 	}
 
 	private function getDatabaseRequest() {
-		return new Request( $this->dataSource->getAccess() );
+		return new Finder($this->dataSource->getAccess() );
 	}
 
 	public function search(Filter $filter = null) {
