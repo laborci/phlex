@@ -4,7 +4,10 @@ class {{name}}Model extends \Phlex\RedFox\Model{
 
 	public function repository(){ return $this->repositoryFactory('{{table}}', '{{database}}'); }
 
-	protected function fields(){
+	public function fields():array {
+		return [
+			'@id' => [\Phlex\RedFox\Fields\IdField::class],
+		];
 	}
 
 	protected function relations(){

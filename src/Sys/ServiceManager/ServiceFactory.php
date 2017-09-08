@@ -1,4 +1,4 @@
-<?php namespace Phlex\Sys;
+<?php namespace Phlex\Sys\ServiceManager;
 
 class ServiceFactory{
 

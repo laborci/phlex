@@ -5,7 +5,6 @@ namespace Phlex\RedFox\Attachment;
 
 use App\Env;
 use Phlex\Chameleon\PageResponder;
-use Phlex\Chameleon\Responder;
 
 
 class ThumbnailResponder extends PageResponder {
@@ -180,7 +179,7 @@ class ThumbnailResponder extends PageResponder {
 		return 0;
 	}
 
-	protected function respond() {
+	protected function respond():string {
 		header('HTTP/1.0 200 OK');
 		header('Content-type: image/'.strtolower($this->ext));
 		$fd = fopen($this->target,'rb');

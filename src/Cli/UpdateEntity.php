@@ -19,12 +19,10 @@ class UpdateEntity extends Command{
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
+
 		$style = new SymfonyStyle($input, $output);
-		$name = ucfirst($input->getArgument('name'));
 
-		$style->title('Updating '.$name.' entity fields');
-
-		$changes = false;
+		$style->write('Updating entity fields ... ');
 
 		$name = $input->getArgument('name');
 		$class = "\\App\\Entity\\".$name."\\".$name;
@@ -40,11 +38,49 @@ class UpdateEntity extends Command{
 
 		$table =  $repository->getDataSource()->getTable();
 		$access = $repository->getDataSource()->getAccess();
-		$fields = $access->getFieldList($table);
 
-		$missings = array_diff($fields, $model->getFields());
-		$unwanteds = array_diff($model->getFields(), $fields);
+		$fields = [];
+		foreach ($access->getFieldData($table) as $db_field) {
+			$field = ['label'=>$db_field['Field'],'data'=>[]];
+			$field['data'][] = $this->fieldSelector($db_field['Type'], $db_field['Field']).'::class';
+			$options = $access->getEnumValues($table, $db_field['Field']);
+			if(count($options)) $field['data'][] = $options;
+			$fields[$db_field['Field']] = $field;
+		}
 
+		foreach ($model->fields() as $key=>$field){
+			$fieldName = trim($key, '@!');
+			if(array_key_exists($fieldName, $fields)) {
+				if (strpos($key, '@') !== false) {
+					$fields[$fieldName]['label'] = '@'.	$fields[$fieldName]['label'];
+				}
+				if (strpos($key, '!') !== false) {
+					$fields[$fieldName]['label'] = '!'.	$fields[$fieldName]['label'];
+					$fields[$fieldName]['data'] = $field;
+					$fields[$fieldName]['data'][0] = '\\'.$fields[$fieldName]['data'][0].'::class';
+				}
+			}
+		}
+
+		$labelLength = 0;
+		foreach ($fields as $field){
+			if(strlen($field['label'])>$labelLength) $labelLength = strlen($field['label']);
+		}
+
+
+		$body = ["\t\treturn ["];
+		$encoder = new \Riimu\Kit\PHPEncoder\PHPEncoder();
+		foreach ($fields as $field){
+			$fieldClass = array_shift($field['data']);
+			if(count($field['data'])){
+				$data = ', '.substr($encoder->encode($field['data'], ['array.inline' => true]),1,-1);
+			}else{
+				$data = '';
+			}
+			$body[] = "\t\t\t'".str_pad($field['label']."'", $labelLength+1, ' ').' => ['.$fieldClass.$data.'],';
+		}
+
+		$body[] = "\t\t];";
 
 		$ref = new \ReflectionClass($class.'Model');
 		$fieldsMethod = $ref->getMethod('fields');
@@ -52,78 +88,18 @@ class UpdateEntity extends Command{
 		$start = $fieldsMethod->getStartLine();
 		$end = $fieldsMethod->getEndLine()-1;
 		$source = file($ref->getFileName());
-		$body = array_slice($source, $start, $end-$start);
 
-		// Handle unwanted fields
-		foreach ($body as $i => $line) {
-			$body[$i] = trim($line);
-		}
+		array_splice($source, $start, $end - $start, $body);
+		array_walk($source, function(&$line){ $line = trim($line, "\n");});
+		file_put_contents($ref->getFileName(), join("\n", $source));
 
-		if(count($unwanteds)) foreach ($body as $i => $line){
-			foreach ($unwanteds as $unwanted){
-				if(strpos($line, "\$this->hasField('".$unwanted."'") === 0){
-					$body[$i] = '//Deleted: '.$line;
-					$style->note("- $unwanted");
-				}
-				$changes = true;
-			}
-		}
 
-		if(count($missings)) {
-			$fieldinfo = [];
-			$rawfieldinfo = $access->getFieldData($table);
-			foreach ($rawfieldinfo as $rawfield){
-				$fieldinfo[$rawfield['Field']] = $rawfield;
-			}
-			foreach ($missings as $missing) {
-				$field = $fieldinfo[$missing];
-				$newline = "\$this->hasField('".$missing."', (new ".$this->fieldSelector($field['Type'], $missing)."(\"".$field['Type']."\"))";
-				$options = $access->getEnumValues($table, $missing);
-				if(count($options)){
-					$newline.="->setOptions(['".join("','", $options)."'])";
-				}
-				if($field['Null'] == 'NO'){
-					$newline.="->notNullable()";
-				}
-				if($missing == 'id'){
-					$newline.="->constant()";
-				}
-				$newline.=");";
-				$body[] = $newline;
-				$style->note("+ $missing");
-				$changes = true;
-			}
-		}
+		$style->writeln('done.');
 
-		if(!$changes){
-			$style->note("There were no changes...");
-		}else {
 
-			foreach ($body as $i => $line) {
-				$body[$i] = "\t\t" . $line . "\n";
-			}
-
-			array_splice($source, $start, $end - $start, $body);
-
-			file_put_contents($ref->getFileName(), join('', $source));
-			$style->success('💾  '.substr($ref->getFileName(), strlen(Env::get('path_root'))));
-		}
-
-		$autodecorate = $input->getOption('autodecorate');
-
-		if($autodecorate || $style->confirm('Would you like to run the entity decorator?')) {
-
-			$style->title('Decorating entity ' . $name);
-
-			exec("./phlex px:decorate-entity --quiet " . $name, $lines, $return);
-			if ($return === 0) {
-				$ref = new \ReflectionClass($class);
-				$style->success('💾  ' . substr($ref->getFileName(), strlen(Env::get('path_root'))));
-			} else {
-				foreach ($lines as $line) {
-					$output->writeln($line);
-				}
-			}
+		exec("./phlex px:decorate-entity " . $name, $lines, $return);
+		foreach ($lines as $line) {
+			$output->writeln($line);
 		}
 
 	}

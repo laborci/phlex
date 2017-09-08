@@ -25,7 +25,7 @@ class DecorateEntity extends Command{
 		$name = ucfirst($input->getArgument('name'));
 		$class = "\\App\\Entity\\".$name."\\".$name;
 
-		$style->title('Decorating entity '.$name);
+		$style->write('Decorating entity ... ');
 
 		/** @var \Phlex\RedFox\Repository $repository */
 		$repository = $class::repository();
@@ -42,7 +42,6 @@ class DecorateEntity extends Command{
 		foreach ($lines as $i=>$line){
 			if(strpos($line,' * px: ') === 0){
 				unset($lines[$i]);
-				//$lines[$i] = '';
 			}
 		}
 		$lines = array_values($lines);
@@ -58,14 +57,13 @@ class DecorateEntity extends Command{
 		$fields = $model->getFields();
 		foreach ($fields as $field){
 			$fieldObj = $model->getField($field);
-			$generatedLines[] = ' * px: @property'.(!$fieldObj->isWritable() ? '-read' : '').' '.$fieldObj->getDataType().' $'.$field;
+			$generatedLines[] = ' * px: @property'.($fieldObj->readonly() ? '-read' : '').' '.$fieldObj->getDataType().' $'.$field;
 		}
 
 		$relations = $model->getRelations();
 		foreach ($relations as $relation){
 			$relationObj = $model->getRelation($relation);
 			$generatedLines[] = ' * px: @property-read'.' '.$relationObj->getRelatedClass().' $'.$relation;
-			$style->warning(get_class($relationObj));
 			if($relationObj instanceof BackReference){
 				$generatedLines[] = ' * px: @method'.' '.$relationObj->getRelatedClass().' '.$relation.'($order=null, $limit=null, $offset=null)';
 			}
@@ -83,7 +81,7 @@ class DecorateEntity extends Command{
 		$source = str_replace($doc, $newBlock, $source);
 
 		file_put_contents($ref->getFileName(), $source);
-		$style->success('💾  '.substr($ref->getFileName(), strlen(Env::get('path_root'))));
+		$style->writeln('done.');
 
 		exit(0);
 	}

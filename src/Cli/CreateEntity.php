@@ -14,6 +14,7 @@ class CreateEntity extends Command{
 	protected function configure() {
 		$this
 			->setName('px:create-entity')
+			->setAliases(['create'])
 			->setDescription('Creates new entity')
 			->addArgument('name', InputArgument::REQUIRED)
 			->addArgument('table')
@@ -29,54 +30,36 @@ class CreateEntity extends Command{
 
 		$style->title('Creating entity: '.$name);
 
+
+		$style->write('Creating files ... ');
 		$root = Env::get('path_root');
 		$dir = 'App/Entity/'.$name;
-		if(is_dir($root.$dir)){
-			$style->note('Folder ('.$dir.') already exists.');
-		}else {
+		if(!is_dir($root.$dir)){
 			mkdir($root.$dir);
 		}
 
 		$file = $dir.'/'.$name.'.php';
 		if(!file_exists($root.$file)){
 			file_put_contents($root.$file, $this->getEntityClass($name));
-			$style->success('💾  '.$file);
-		}else{
-			$style->note('File ('.$file.') already exists.');
 		}
 
 		$file = $dir.'/'.$name.'Repository.php';
 		if(!file_exists($root.$file)){
 			file_put_contents($root.$file, $this->getRepositoryClass($name));
-			$style->success('💾  '.$file);
-		}else{
-			$style->note('File ('.$file.') already exists.');
 		}
 
 		$file = $dir.'/'.$name.'Model.php';
 		if(!file_exists($root.$file)){
 			file_put_contents($root.$file, $this->getModelClass($name, $database, $table));
-			$style->success('💾  '.$file);
-		}else{
-			$style->note('File ('.$file.') already exists.');
 		}
 
-		//
-		//$file = $dir.'/'.$name.'DataSource.php';
-		//if(!file_exists($root.$file)){
-		//	file_put_contents($root.$file, $this->getDataSourceClass($name, $database, $table));
-		//	$style->success('💾  '.$file);
-		//}else{
-		//	$style->note('File ('.$file.') already exists.');
-		//}
+		$style->writeln('done.');
 
-		$style->success('Done');
+		$command = $this->getApplication()->find('px:update-entity');
+		$updateInput = new ArrayInput(['command' => 'px:update-entity', 'name' => $name]);
+		$command->run($updateInput, $output);
 
-		if($style->confirm('Would you like to run the entity updater?')){
-			$command = $this->getApplication()->find('px:update-entity');
-			$updateInput = new ArrayInput(['command' => 'px:update-entity', 'name' => $name]);
-			$command->run($updateInput, $output);
-		}
+		$style->writeln('');
 
 	}
 

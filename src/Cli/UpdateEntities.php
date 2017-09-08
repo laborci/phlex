@@ -7,29 +7,28 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+class UpdateEntities extends Command {
 
-class UpdateEntities extends Command{
 	protected function configure() {
-		$this
-			->setName('px:update-entities')
-			->setDescription('Updates model from database table')
-		;
+		$this->setName('px:update-entities')->setAliases(['update'])->setDescription('Updates model from database table');
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 		$style = new SymfonyStyle($input, $output);
 
 		$style->title('Updating all entites');
-		$folders = glob(Env::get('path_root').'App/Entity/*');
-		foreach ($folders as $folder){
-			if(is_dir($folder)){
+		$folders = glob(Env::get('path_root') . 'App/Entity/*');
+		foreach ($folders as $folder) {
+			if (is_dir($folder)) {
 				$name = basename($folder);
+				$style->section($name);
 				$command = $this->getApplication()->find('px:update-entity');
-				$updateInput = new ArrayInput(['command' => 'px:update-entity', 'name' => $name, '--autodecorate'=>true]);
-				$command->run($updateInput, $output);			}
+				$updateInput = new ArrayInput(['command' => 'px:update-entity', 'name' => $name]);
+				$command->run($updateInput, $output);
+				$style->writeln('');
+			}
 		}
 
 	}
-
 
 }

@@ -45,6 +45,12 @@ abstract class Environment {
 		static::$instance->initialize();
 	}
 
+	/**
+	 * @param string|null $name
+	 *
+	 * @return string|array
+	 * @throws \Exception
+	 */
 	public static function get(string $name = null){
 		if(is_null($name)){
 			return static::$instance->config;

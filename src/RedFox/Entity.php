@@ -18,15 +18,10 @@ abstract class Entity implements \JsonSerializable {
 	private $deleted = false;
 	private $repository = null;
 
-	/**
-	 * @return \Phlex\RedFox\Repository
-	 */
-
+	/** @return \Phlex\RedFox\Repository */
 	public static function repository(){ return static::model()->repository(); }
 
-	/**
-	 * @return \Phlex\RedFox\Model
-	 */
+	/** @return \Phlex\RedFox\Model */
 	public static function model(){
 		static $model;
 		if(is_null($model)){
@@ -50,7 +45,7 @@ abstract class Entity implements \JsonSerializable {
 
 	public function save(){
 		if($this->deleted){
-			$this->record->set('id', null, true);
+			$this->record->set('id', null);
 		}
 		if($this->isExists()){
 			return $this->update();
@@ -82,7 +77,7 @@ abstract class Entity implements \JsonSerializable {
 	}
 
 	public function setRepository(Repository $repository = null, $keepId = false){
-		if(!$keepId) $this->record->set('id', null, true);
+		if(!$keepId) $this->record->set('id', null);
 		$this->repository = is_null($repository) ? static::repository() : $repository;
 	}
 
@@ -113,7 +108,7 @@ abstract class Entity implements \JsonSerializable {
 	public function __get($name) {
 		if(method_exists($this, $method = '__get'.ucfirst($name))){
 			return $this->$method();
-		}else if($this->record->hasField($name)){
+		}else if(static::model()->fieldExists($name)){
 			return $this->record->get($name);
 		}else if(static::model()->isRelationExists($name)){
 			return static::model()->getRelation($name)($this);
@@ -140,19 +135,12 @@ abstract class Entity implements \JsonSerializable {
 	public function __set($name, $value) {
 		if(method_exists($this, $method = '__set'.ucfirst($name))){
 			$this->$method($value);
-		}else if($this->record->hasField($name)){
+		}else if(static::model()->fieldWritable($name)){
 			$this->record->set($name, $value);
 		}
 	}
 
 	function __toString() { return $this->id; }
-
-	function getId(){
-		return $this->id;
-	}
-
-	function jsonSerialize(){
-		return $this->getRawData();
-	}
+	function jsonSerialize(){return $this->getRawData();}
 
 }

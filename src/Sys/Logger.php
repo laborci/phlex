@@ -2,7 +2,7 @@
 
 
 
-class Logger implements SharedService{
+class Logger implements ServiceManager\SharedService{
 
 	protected $logfile;
 	protected $colors;

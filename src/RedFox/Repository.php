@@ -1,5 +1,6 @@
 <?php namespace Phlex\RedFox;
 
+use App\ServiceManager;
 use Phlex\Database\DataSource;
 use Phlex\Database\Filter;
 use Phlex\Database\Finder;
@@ -62,6 +63,12 @@ abstract class Repository {
 		return $objects;
 	}
 
+	protected function count(Filter $filter = null){
+		$count =  array_pop($this->getDatabaseFinder()->select("count(id)")->from($this->dataSource->getTable())->where($filter)->pick());
+		ServiceManager::getLogger()->info($count);
+		return $count;
+	}
+
 	public function insert(Entity $object) {
 		$data = $object->getRawData();
 		$id = $this->dataSource->insert($data);
@@ -83,13 +90,13 @@ abstract class Repository {
 		$this->dataSource->delete($object->id);
 	}
 
-	private function getDatabaseRequest() {
+	private function getDatabaseFinder():Finder {
 		return new Finder($this->dataSource->getAccess() );
 	}
 
 	public function search(Filter $filter = null) {
 		$table = $this->dataSource->getAccess()->escapeSQLEntity($this->dataSource->getTable());
-		return $this->getDatabaseRequest()
+		return $this->getDatabaseFinder()
 				->select($table.'.*')
 				->from($table)
 				->setConverter(function ($record){

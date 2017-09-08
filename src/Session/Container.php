@@ -1,6 +1,6 @@
 <?php namespace Phlex\Session;
 
-use Phlex\Sys\SharedService;
+use Phlex\Sys\ServiceManager\SharedService;
 
 abstract class Container implements SharedService {
 

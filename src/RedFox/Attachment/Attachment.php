@@ -24,19 +24,9 @@ class Attachment extends \Symfony\Component\HttpFoundation\File\File {
 
 	public function delete(){
 		$this->deleteMetaFile();
+		$this->thumbnail->purge();
 		unlink($this->getPathname());
 	}
-
-	//function rename(string $newname) {
-	//	if(strpos($newname, '/') !== false){
-	//		return false;
-	//	}
-	//	else{
-	//		rename($this->getFile(), $this->manager->getPath().$newname);
-	//		$this->filename = $newname;
-	//		return true;
-	//	}
-	//}
 
 	#region Meta
 	public function getMeta($key){

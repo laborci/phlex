@@ -1,6 +1,6 @@
 <?php namespace Phlex\Auth;
 
-use Phlex\Sys\InjectDependencies;
+use Phlex\Sys\ServiceManager\InjectDependencies;
 
 abstract class AuthService implements InjectDependencies, AuthServiceInterface {
 

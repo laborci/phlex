@@ -30,7 +30,7 @@ class Record {
 		}
 	}
 
-	public function hasField($name) { return $this->model->fieldExists($name); }
+//	public function hasField($name) { return $this->model->fieldExists($name); }
 
 	protected function exportDirty(){
 		foreach(array_keys($this->dirtyFields) as $name){
@@ -45,13 +45,11 @@ class Record {
 		return $this->model->getField($name)->import($this->record[$name]);
 	}
 
-	public function set($name, $value, $force = false) {
+	public function set($name, $value) {
 		$field = $this->model->getField($name);
-		if($field->isWritable() || $force || ($field->isConstant() && is_null($this->get($name)))) {
-			$this->dirty = true;
-			$this->dirtyFields[$name] = true;
-			$this->data[$name] = $field->set($value);
-		}
+		$this->dirty = true;
+		$this->dirtyFields[$name] = true;
+		$this->data[$name] = $field->set($value);
 	}
 
 	protected function fill($data) {

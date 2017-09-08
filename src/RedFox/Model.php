@@ -40,38 +40,35 @@ abstract class Model {
 	private $relations = [];
 
 	private function setup(){
-		$this->fields();
-		$this->decorateFields();
+		$fields = $this->fields();
+		foreach ($fields as $name => $field) {
+			$class = array_shift($field);
+			/** @var \Phlex\RedFox\Field $field */
+			$field = new $class(...$field);
+			if ( strpos($name, '@') !== false ) $field->readonly(true);
+			$name = trim($name, '@!');
+			$this->fields[$name] = $field;
+		}
 		$this->relations();
 		$this->attachments();
 	}
 
-	abstract protected function fields();
+	abstract public function fields():array;
 	abstract protected function relations();
 	abstract protected function attachments();
-	protected function decorateFields(){}
 
 	#region Fields
 
 	public function fieldExists(string $name):bool { return array_key_exists($name, $this->fields); }
-	/**
-	 * @param string $name
-	 * @param        $value
-	 * @return mixed
-	 */
-	public function import(string $name, $value) { return $this->fields[$name]->import($value); }
-	/**
-	 * @param string $name
-	 * @param        $value
-	 * @return mixed
-	 */
-	public function export(string $name, $value) { return $this->fields[$name]->export($value); }
+	public function fieldWritable(string $name):bool { return array_key_exists($name, $this->fields) && !$this->fields[$name]->readonly(); }
+
+//	public function import(string $name, $value) { return $this->fields[$name]->import($value); }
+//	public function export(string $name, $value) { return $this->fields[$name]->export($value); }
 
 	public function getField($name):Field { return $this->fields[$name]; }
-
 	public function getFields():array { return array_keys($this->fields); }
 
-	public function hasField(string $name, Field $field) { $this->fields[$name] = $field; }
+//	private function hasField(string $name, Field $field) { $this->fields[$name] = $field; return $field;}
 	#endregion
 
 	#region Related Fields

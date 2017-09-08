@@ -5,20 +5,18 @@ use Phlex\RedFox\Field;
 
 class SetField extends Field{
 
-	public function getDataType(){return 'array';}
-
 	protected $options;
 
-	public function setOptions(array $options){ $this->options = $options; return $this; }
+	public function __construct($options) {
+		$this->options = $options;
+	}
+
+	public function getDataType(){return 'array';}
+
 	public function getOptions(){ return $this->options; }
 
-	public function import($value){
-		return explode(',',$value);
-	}
-
-	public function export($value){
-		return join(',',$value);
-	}
+	public function import($value){ return explode(',',$value);}
+	public function export($value){ return join(',',$value); }
 
 	public function set($value){
 		echo 'itt';

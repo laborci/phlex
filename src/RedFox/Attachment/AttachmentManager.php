@@ -83,9 +83,6 @@ class AttachmentManager{
 	//	$this->attachments = null;
 	//}
 
-	public function renameFile($filename, $newfilename){
-
-	}
 
 	public function deleteFile($filename){
 		$attachments = $this->getAttachments();

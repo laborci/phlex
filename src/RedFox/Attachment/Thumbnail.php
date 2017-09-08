@@ -4,7 +4,7 @@ namespace Phlex\RedFox\Attachment;
 
 
 use App\Env;
-
+use Phlex\Sys\ServiceManager;
 
 /**
  * Class Thumbnail
@@ -29,6 +29,11 @@ class Thumbnail {
 
 	public function __construct(Attachment $file) {
 		$this->file = $file;
+	}
+
+	public function purge(){
+		$files = glob(Env::get('path_thumbnails').$this->file->getFilename().'.*.'.$this->file->pathId.'.*');
+		foreach ($files as $file) unlink($file);
 	}
 
 	public function scale(int $width, int $height) {
