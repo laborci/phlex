@@ -33,8 +33,14 @@ final class Handler {
 
 	protected function runResponder($responderClass, $attributes) {
 		$this->request->attributes->replace($attributes);
+		if(is_array($responderClass)){
+			$method = $responderClass[1];
+			$responderClass = $responderClass[0];
+		}else{
+			$method = null;
+		}
 		$responder = $this->createResponder($responderClass);
-		$responder();
+		is_null($method) ? $responder() : $responder($method);
 		die();
 	}
 

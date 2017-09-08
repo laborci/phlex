@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\FileBag;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\ServerBag;
-
+use zpt\anno\Annotations;
 
 abstract class Responder{
 
@@ -19,6 +19,17 @@ abstract class Responder{
 	public function __construct() {
 		$this->request = ServiceManager::get('Request');
 		$this->response = ServiceManager::get('Response');
+
+		$ref = new \ReflectionClass($this);
+		foreach ($ref->getProperties() as $property) {
+			$annotations = new Annotations($property);
+			if($annotations->hasAnnotation('from')){
+				list($bag, $key) = preg_split('/\s+/', $annotations['from']);
+				$method = 'get'.ucfirst($bag).'Bag';
+				$propertyName = $property->getName();
+				$this->$propertyName = $this->$method()->get($key);
+			}
+		}
 	}
 
 	abstract function __invoke();

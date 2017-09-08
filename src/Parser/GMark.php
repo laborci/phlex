@@ -2,7 +2,7 @@
 
 use zpt\anno\Annotations;
 
-class GMark {
+abstract class GMark {
 
 	private $commands = [];
 
@@ -29,7 +29,7 @@ class GMark {
 				if(is_string($commands)) $commands = [$commands];
 				foreach ($commands as $command){
 					$command = trim($command);
-					list($command, $as) = preg_split('/\s+/', $command, 2);
+					list($command, $as) = array_pad(preg_split('/\s+/', $command, 2), 2, null);
 					$as = $as ? $as : $command;
 					$this->commands[$command] = [
 						'method'=>$method->name,
@@ -57,13 +57,11 @@ class GMark {
 	private function parseBlock($block){
 
 		$command = preg_split('/\s+/', $block, 2)[0];
-
-
 		if(array_key_exists($command, $this->commands)){
 			$command = $this->commands[$command];
 			$method = $command['method'];
-			list($commandLine, $body) = explode("\n", $block, 2);
-			$attr = trim(preg_split('/\s+/', $commandLine, 2)[1]);
+			list($commandLine, $body) = array_pad(explode("\n", $block, 2),2, null);
+			$attr = trim(array_pad(preg_split('/\s+/', $commandLine, 2), 2, null)[1]);
 			if($command['attrType'] === 'array'){
 				try{
 					$attr = $this->parseAttributes($attr);

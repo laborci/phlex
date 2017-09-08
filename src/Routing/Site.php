@@ -1,6 +1,10 @@
 <?php namespace Phlex\Routing;
 
 
+use App\Env;
+use Phlex\Sys\ServiceManager\ServiceManager;
+use zpt\anno\Annotations;
+
 abstract class Site{
 
 	protected $charset = 'utf-8';
@@ -25,6 +29,10 @@ abstract class Site{
 
 	abstract protected function route(Router $router);
 
-	abstract protected function domainMatch(Request $request):bool;
+	protected function domainMatch(Request $request):bool{
+		$annotations = (new Annotations(new \ReflectionClass($this)))->asArray();
+		$domain = str_replace('@', Env::get('domain'), $annotations['domain']);
+		return $request->fnMatchHost(...preg_split('/\s+/', $domain));
+	}
 
 }

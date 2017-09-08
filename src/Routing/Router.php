@@ -5,6 +5,7 @@ use Phlex\Chameleon\ReRouter;
 use Phlex\Chameleon\Responder;
 use Phlex\Chameleon\ResponderException;
 use Phlex\Routing\Request;
+use Phlex\Sys\ServiceManager\ServiceManager;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 class Router {
@@ -60,7 +61,7 @@ class Router {
 				$handler = new Handler($this->request, $this->middlewares);
 
 				if (!is_null($pageResponderClass)) {
-					$handler->respond($pageResponderClass);
+					$handler->respond($pageResponderClass, $attributes);
 				} else {
 					return $handler;
 				}
