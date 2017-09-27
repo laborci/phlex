@@ -18,6 +18,13 @@ class {{name}}Model extends \Phlex\RedFox\Model{
 	    // To add attachment group use the "hasAttachmentGroup" method
 	}
 
+	/**
+	 * @param \App\Entity\{{name}}\{{name}} $object
+	 */
+	protected function setDefaults($object) {
+	    // Set default values of the given object
+	}
+
 }
 
 

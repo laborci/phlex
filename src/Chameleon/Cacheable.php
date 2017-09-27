@@ -2,15 +2,14 @@
 
 use App\ServiceManager;
 
-
 trait Cacheable {
 
 	protected $cacheable = true;
 
 	private $responseCache;
 
-	private function cacheKey(){
-		return str_replace('\\', '_',$this->getCacheKey());
+	private function cacheKey() {
+		return str_replace('\\', '_', $this->getCacheKey());
 	}
 
 	public function __invoke() {
@@ -33,7 +32,7 @@ trait Cacheable {
 
 	protected function beforeCacheHandler() { }
 
-	protected function getCacheKey(): string { return  get_class($this); }
+	protected function getCacheKey(): string { return get_class($this); }
 
 	protected function getCacheInvalidationTime(): int { return 180; }
 
@@ -44,7 +43,7 @@ trait Cacheable {
 		return $cacheInvalidationTime == 0 || time() < ($cache->getTime($key) + $cacheInvalidationTime);
 	}
 
-	protected function invalidateCache(){
+	protected function invalidateCache() {
 		/** @var \Phlex\Sys\FileCache $cache */
 		$cache = ServiceManager::get('cache.response');
 		$key = $this->cacheKey();

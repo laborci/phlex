@@ -3,7 +3,6 @@
 use App\ServiceManager;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
-
 abstract class Customtag implements SmartPageComponentInterface {
 
 	use TrexParser;
@@ -20,24 +19,33 @@ abstract class Customtag implements SmartPageComponentInterface {
 
 	abstract protected function prepare();
 
-	public function addJsInclude($src) { if(!is_null($this->parent)) $this->parent->addJsInclude($src); }
+	public function addJsInclude($src) {
+		if (!is_null($this->parent))
+			$this->parent->addJsInclude($src);
+	}
 
-	public function addCssInclude($src) {  if(!is_null($this->parent)) $this->parent->addCssInclude($src); }
+	public function addCssInclude($src) {
+		if (!is_null($this->parent))
+			$this->parent->addCssInclude($src);
+	}
 
-	protected function getSurroundAttribute($attr, $seek = false){
+	protected function getSurroundAttribute($attr, $seek = false) {
 
-		if(count(DoubleCustomtag::$tags)) for($i = count(DoubleCustomtag::$tags) -1 ; $i>=0 ; $i--){
-			$parentTag = DoubleCustomtag::$tags[$i];
-			/** @var ParameterBag $attrs */
-			$attrs = $parentTag->getAttributeParamBag();
-			if($attrs->has($attr)) return $attrs->get($attr);
-			if(!$seek) break;
-		}
+		if (count(DoubleCustomtag::$tags))
+			for ($i = count(DoubleCustomtag::$tags) - 1; $i >= 0; $i--) {
+				$parentTag = DoubleCustomtag::$tags[ $i ];
+				/** @var ParameterBag $attrs */
+				$attrs = $parentTag->getAttributeParamBag();
+				if ($attrs->has($attr))
+					return $attrs->get($attr);
+				if (!$seek)
+					break;
+			}
 
 		return null;
 	}
 
-	public function setup(ParameterBag $attributes, $parent){
+	public function setup(ParameterBag $attributes, $parent) {
 		$this->parent = $parent;
 		$this->attributes = $attributes;
 	}

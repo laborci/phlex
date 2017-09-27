@@ -1,21 +1,17 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: elvis
- * Date: 2017. 07. 11.
- * Time: 8:01
- */
-
-namespace Phlex\Auth;
-
+<?php namespace Phlex\Auth;
 
 use Phlex\Session\Container;
 
+/**
+ * Basic AuthContainer.
+ * Good for most of the cases
+ * @package Phlex\Auth
+ */
 class AuthContainer extends Container implements AuthContainerInterface {
 
 	protected $userId;
 
-	public function setUserId($userId) {
+	public function setUserId(int $userId) {
 		$this->userId = $userId;
 	}
 
