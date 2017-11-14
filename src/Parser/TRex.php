@@ -321,7 +321,7 @@ class TRex{
 
 	#region CUSTOMTAG
 	protected function parseCustomTag($line){
-		if($count = preg_match_all('/<ct:([\w\d_]+)((\s+[\w\d-:]+="((\\"|.)*?)")*)\s*\/?>/', $line, $matches)){
+		if($count = preg_match_all('/<ct:([\w\d\\\\_]+)((\s+[\w\d-:]+="((\\"|.)*?)")*)\s*\/?>/', $line, $matches)){
 			for($i = 0; $i < $count; $i++){
 				$customtag = trim($matches[0][$i]);
 				$customtagClass = trim($matches[1][$i]);

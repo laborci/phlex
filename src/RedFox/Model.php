@@ -53,7 +53,7 @@ abstract class Model {
 		$this->attachments();
 	}
 
-	protected function setDefaults($object){}
+	public function setDefaults($object){}
 
 	abstract public function fields():array;
 	abstract protected function relations();

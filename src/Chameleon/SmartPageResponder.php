@@ -1,27 +1,24 @@
 <?php namespace Phlex\Chameleon;
 
-
 abstract class SmartPageResponder extends TRexPageResponder implements SmartPageComponentInterface {
 
-	private $serverData = array();
+	private $serverData = [];
 	private $extensions = [];
 	private $loadedExtensions = [];
-	private $bodyClass = [];
 
-	protected $lang = 'hu';
-	protected $title = "Phlex:Chameleon";
-
-	protected function addBodyClass(string $class){ $this->bodyClass[$class] = $class; }
-	protected function removeBodyClass(string $class){ unset($this->bodyClass[$class]); }
-	protected function getBodyClass(){return join(' ', $this->bodyClass); }
+	protected $bodyClass = '';
+	protected $language = 'hu';
+	protected $title = '';
 
 	protected function getServerData() { return $this->serverData; }
-	protected function getServerDataJson() { return json_encode($this->serverData); }
-	protected function addServerData($key, $value) { $this->serverData[$key] = $value; }
+	protected function getServerDataScript() { return '<script> var serverData = ' . json_encode($this->serverData) . ';</script>'; }
+	protected function addServerData($key, $value) { $this->serverData[ $key ] = $value; }
 
-	public function addMeta($name, $content, $useProperty = false) { $this->headerExtensions[] = '<meta ' . $useProperty ? 'property' : 'name' . '="' . $name . '" content="' . $content . '" />'; }
+	public function addMeta($name, $content, $useProperty = false) {
+		$this->extensions[] = '<meta ' . $useProperty ? 'property' : 'name' . '="' . $name . '" content="' . $content . '" />';
+	}
 
-	public function addJsInclude( $src) {
+	public function addJsInclude($src) {
 		if (!in_array($src, $this->loadedExtensions)) {
 			$this->extensions[] = '<script src="' . $src . '"></script>';
 			$this->loadedExtensions[] = $src;
@@ -36,42 +33,44 @@ abstract class SmartPageResponder extends TRexPageResponder implements SmartPage
 	}
 
 	protected function writeExtensions() {
-		foreach ($this->extensions as $extension) echo $extension . "\n";
-		$this->headerExtensions = null;
+		foreach ($this->extensions as $extension)
+			echo $extension . "\n";
+		$this->extensions = null;
+	}
+
+	protected function customtagNamespace() { return null; }
+
+	private function setCustomtagNamespace() {
+		$ns = $this->customtagNamespace();
+		if (!is_null($ns)) {
+			echo '@ctns ' . str_replace('.', '\\', $ns) . "\n";
+		}
 	}
 
 	protected function template() {
 		$this->setCustomtagNamespace();
-		?>
-		@var serverDataJson = $this->getServerDataJson();
-		@var bodyClass = $this->getBodyClass();
+		$this->HTML();
+	}
 
+	protected function HTML() { ?>
 		<!doctype html>
-		<html lang="{{.lang}}">
+		<html lang="{{.language}}">
 		<head>
-			<?php $this->headTpl() ?>
-			<script> var serverData = {{serverDataJson}}; </script>
+			@php echo $this->getServerDataScript();
 			@php $this->writeExtensions();
+			<?php $this->HEAD() ?>
 		</head>
-		<body class="{{bodyClass}}">
-			<?php $this->bodyTpl() ?>
+		<body class="{{.bodyClass}}">
+		<?php $this->BODY() ?>
 		</body>
 		</html>
 	<?php }
 
-	protected function headTpl() {
-		?>
+	protected function HEAD() { ?>
 		<title>{{.title}}</title>
 		<meta charset="utf-8">
-		<?php
-	}
+	<?php }
 
-	abstract protected function bodyTpl();
+	abstract protected function BODY();
 
-	protected function customtagNamespace(){return null;}
-
-	private function setCustomtagNamespace(){
-		$ns = $this->customtagNamespace();
-		if(!is_null($ns)) echo '@ctns '.str_replace('.','\\',$ns)."\n";
-	}
 }

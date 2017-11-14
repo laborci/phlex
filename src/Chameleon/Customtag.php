@@ -65,4 +65,5 @@ abstract class Customtag implements SmartPageComponentInterface {
 	protected function respond() { echo $this->respondTemplate('tag'); }
 
 	abstract protected function tag();
+
 }

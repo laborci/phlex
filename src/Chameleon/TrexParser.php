@@ -14,10 +14,12 @@ trait TrexParser {
 		$templateCache = ServiceManager::get('cache.template');
 
 		if (!$templateCache->exists($key) || $this->isDevAndDirty($key)) {
-			//trigger_error('template_caching: '.$key);
 			ob_start();
+			$this->prepareParser();
 			$this->$method();
 			$template = ob_get_clean();
+			$ref = new \ReflectionClass($this);
+			$template = '@ctns '.$ref->getNamespaceName()."\n".$template;
 			$output = TRex::parseString($template);
 			$templateCache->set($key, $output);
 		}
@@ -26,10 +28,13 @@ trait TrexParser {
 		return ob_get_clean();
 	}
 
+	protected function prepareParser(){}
+
 	final protected function isDevAndDirty($key) {
 
 		if(!Env::get('dev-mode')) return false;
 
+		/** @var \Phlex\Sys\FileCache $templateCache */
 		$templateCache = ServiceManager::get('cache.template');
 
 		$time = 0;

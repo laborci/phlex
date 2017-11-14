@@ -80,11 +80,6 @@ abstract class Repository {
 		$this->dataSource->update($data['id'], $data);
 	}
 
-	public function getActiveUsers(){
-		return $this->search("status='active")->collect();
-	}
-
-
 	public function delete(Entity $object){
 		$this->cache->delete($object->id);
 		$this->dataSource->delete($object->id);

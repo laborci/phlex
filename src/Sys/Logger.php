@@ -91,6 +91,10 @@ class Logger implements ServiceManager\SharedService{
 		$this->writeOut(' - Request / '.$method.' - ', $uri, 'request', null, null, true);
 	}
 
+	public function __invoke($message) {
+		$this->info($message);
+	}
+
 	public function info($message){
 		if(is_scalar($message)){
 			$details = null;
