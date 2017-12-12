@@ -107,13 +107,13 @@ class Finder {
 		}
 	}
 
-	public function collectPage($pageSize, $page, &$count):array {
+	public function collectPage($pageSize, $page, &$count = 0):array {
 		$data = $this->collectPageData($pageSize, $page, $count);
 		if($converter = $this->converter) $data = array_map($converter, $data);
 		return $data;
 	}
 
-	public function collectPageData($pageSize, $page, &$count):array {
+	public function collectPageData($pageSize, $page, &$count = 0):array {
 		$pageSize = abs(intval($pageSize));
 		$page = abs(intval($page));
 		$count = $this->count();

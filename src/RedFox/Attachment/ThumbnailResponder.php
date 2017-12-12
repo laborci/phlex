@@ -185,6 +185,7 @@ class ThumbnailResponder extends PageResponder {
 		$fd = fopen($this->target,'rb');
 		fpassthru($fd);
 		fclose($fd);
+		return '';
 	}
 
 }

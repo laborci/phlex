@@ -299,7 +299,7 @@ class TRex{
 		
 		$firstChar = substr($value, 0, 1);
 		$firstTwoChar = substr($value, 0, 2);
-		if($firstChar == "'" || $firstChar == '"' || is_numeric($value)){
+		if($firstChar == "$" || $firstChar == "'" || $firstChar == '"' || is_numeric($value)){
 			$realValue = $value;
 		}elseif($firstChar == '.'){
 			$realValue = '$this->'.$this->parseVarIndex(substr($value, 1));
@@ -314,8 +314,16 @@ class TRex{
 	}
 
 	protected function parseVarIndex($var){
+		preg_match_all('/\(.*?\)/', $var, $calls);
+		foreach($calls[0] as $idx=>$call){
+			$var = str_replace($call, '@call-'.str_pad($idx, 4, '0', STR_PAD_LEFT), $var);
+		}
 		$var = str_replace('.','->',$var);
 		$var = preg_replace('/:([a-zA-Z0-9_]*)/', '[\'$1\']', $var, -1, $count);
+		foreach($calls[0] as $idx=>$call){
+			$var = str_replace('@call-'.str_pad($idx, 4, '0', STR_PAD_LEFT), $call, $var);
+		}
+
 		return $var;
 	}
 

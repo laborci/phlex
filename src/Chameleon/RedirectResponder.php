@@ -6,7 +6,7 @@ abstract class RedirectResponder extends Responder {
 
 	public function __construct() {
 		parent::__construct();
-		$this->setResponse( new RedirectResponse('/', 302, $this->getResponse()->headers->all()) );
+		$this->setResponse( new RedirectResponse('/', 301, $this->getResponse()->headers->all()) );
 	}
 
 	public function __invoke() {

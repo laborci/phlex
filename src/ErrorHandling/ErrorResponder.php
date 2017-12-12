@@ -16,7 +16,7 @@ class ErrorResponder extends SmartPageResponder {
 	}
 
 
-	protected function bodyTpl() { ?>
+	protected function BODY() { ?>
 		<style>
 			body{margin:0; background-color: #5e5e5e}
 			*{font-family: arial; font-size:12px;}

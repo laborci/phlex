@@ -31,7 +31,7 @@ abstract class Middleware extends Responder {
 		die();
 	}
 
-	protected function redirect($url, $statusCode = 302) {
+	protected function redirect($url, $statusCode = 301) {
 		RedirectResponse::create($url, $statusCode, $this->getResponse()->headers->all())->send();
 		die();
 	}

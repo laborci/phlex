@@ -34,10 +34,13 @@ abstract class Repository {
 		$cached = $this->cache->get($id);
 		if(!is_null($cached)) return $cached;
 		$data = $this->dataSource->pick($id);
-		if($strict) $this->throwExceptionOnEmpty($data);
-		$object = new $this->entityClass($data, $this);
-		$this->addToCache($object);
-		return $object;
+		if($data){
+			$object = new $this->entityClass($data, $this);
+			$this->addToCache($object);
+			return $object;
+
+		}if($strict) $this->throwExceptionOnEmpty($data);
+		return null;
 	}
 
 	public function collect(array $ids, bool $strict = true) {

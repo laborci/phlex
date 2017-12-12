@@ -1,23 +1,16 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: elvis
- * Date: 2017. 07. 11.
- * Time: 18:35
- */
+<?php namespace Phlex\ErrorHandling;
 
-namespace Phlex\ErrorHandling;
-
-
+use App\ServiceManager;
 use Phlex\Chameleon\Middleware;
 
 class ErrorCatcher extends Middleware {
 
-	function __invoke(callable $next) {
-		try{
-			$next();
-		}catch (\Throwable $exception){
-			$this->respond(ErrorResponder::class, ['exception'=>$exception]);
+	function run() {
+		try {
+			$this->next();
+		} catch (\Throwable $exception) {
+			$this->respond(ServiceManager::get('Error-Page'), [ 'exception' => $exception ]);
 		}
 	}
+
 }

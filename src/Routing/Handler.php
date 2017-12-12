@@ -1,7 +1,6 @@
 <?php namespace Phlex\Routing;
 
 use Phlex\Chameleon\Middleware;
-use Phlex\Chameleon\PageResponder;
 use Phlex\Chameleon\Responder;
 use App\ServiceManager;
 
@@ -34,7 +33,11 @@ final class Handler {
 	protected function runResponder($responderClass, $attributes) {
 		$this->request->attributes->replace($attributes);
 		if(is_array($responderClass)){
-			$method = $responderClass[1];
+			if(count($responderClass) == 1){
+				$method = $this->request->pathParams->get('method');
+			}else {
+				$method = $responderClass[ 1 ];
+			}
 			$responderClass = $responderClass[0];
 		}else{
 			$method = null;
