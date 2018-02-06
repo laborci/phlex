@@ -54,18 +54,34 @@ class Router {
 		if ($this->request->isMethod($method)) {
 			$uri = rtrim($this->request->getPathInfo(), '/');
 			if (!$uri) $uri = '/';
-			if ($this->testPattern($pattern, $uri)) {
 
-				$this->request->pathParams->replace($this->getParams($pattern, $uri));
-				$this->request->attributes->replace($attributes);
-				$handler = new Handler($this->request, $this->middlewares);
+			$patternParts = explode('|', $pattern);
 
-				if (!is_null($pageResponderClass)) {
-					$handler->respond($pageResponderClass, $attributes);
-				} else {
-					return $handler;
+			$patterns = [];
+			if(count($patternParts)>1) {
+				$p = '';
+				for ($i = 0; $i < count($patternParts); $i++) {
+					$p.=$patternParts[$i];
+					array_unshift($patterns, $p);
+				}
+			}else{
+				$patterns[] = $pattern;
+			}
+
+			foreach($patterns as $pattern) {
+				if ($this->testPattern($pattern, $uri)) {
+					$this->request->pathParams->replace($this->getParams($pattern, $uri));
+					$this->request->attributes->replace($attributes);
+					$handler = new Handler($this->request, $this->middlewares);
+
+					if (!is_null($pageResponderClass)) {
+						$handler->respond($pageResponderClass, $attributes);
+					} else {
+						return $handler;
+					}
 				}
 			}
+
 		}
 		return new Handler(); // Dummy handler - does nothing;
 	}

@@ -11,9 +11,9 @@ class Storage{
 	protected $access;
 	protected $table;
 
-	public function __construct(string $database, $table) {
-		$this->access = ServiceManager::get($database);
-		$this->table = $table;
+	public function __construct(DataSource $dataSource) {
+		$this->table = $dataSource->getTable();
+		$this->access = $dataSource->getAccess();
 	}
 
 	function __invoke($key, $value = null) {
