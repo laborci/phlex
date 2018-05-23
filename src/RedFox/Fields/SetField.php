@@ -7,7 +7,8 @@ class SetField extends Field{
 
 	protected $options;
 
-	public function __construct($options) {
+	public function __construct($entityClass, $name, $options) {
+		parent::__construct($entityClass, $name);
 		$this->options = $options;
 	}
 

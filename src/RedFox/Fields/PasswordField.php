@@ -4,7 +4,10 @@ class PasswordField extends StringField {
 
 	protected $salt;
 
-	public function __construct($salt) { $this->salt = $salt; }
+	public function __construct($entityClass, $name, $salt) {
+		parent::__construct($entityClass, $name);
+		$this->salt = $salt;
+	}
 	public function getDataType() { return 'string'; }
 	public function set($value) { return $this->hash($value); }
 	public function check($value, $hash) { return $this->hash($value) === $hash; }

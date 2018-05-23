@@ -3,6 +3,21 @@
 abstract class Field {
 
 	private $readonly = false;
+	private $name;
+	private $entityClass;
+
+	public function __construct($entityClass, $name) {
+		$this->entityClass = $entityClass;
+		$this->name = $name;
+	}
+
+	public function getName(){
+		return $this->name;
+	}
+
+	public function getEntityClass(){
+		return $this->entityClass;
+	}
 
 	public function readonly(bool $set = false){
 		if($set) $this->readonly = true;

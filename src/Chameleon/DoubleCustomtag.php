@@ -13,6 +13,6 @@ abstract class DoubleCustomtag extends Customtag{
 	}
 
 	final public static function close(){ array_pop(static::$tags)->respondCloser(); }
-	protected function respondCloser(){ $this->respondTemplate('closer'); }
+	protected function respondCloser(){ echo $this->respondTemplate('closer'); }
 	abstract protected function closer();
 }

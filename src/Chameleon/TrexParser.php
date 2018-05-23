@@ -23,9 +23,11 @@ trait TrexParser {
 			$output = TRex::parseString($template);
 			$templateCache->set($key, $output);
 		}
+
 		ob_start();
 		include $templateCache->file($key);
-		return ob_get_clean();
+		$buffer = ob_get_clean();
+		return $buffer;
 	}
 
 	protected function prepareParser(){}

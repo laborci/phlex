@@ -43,11 +43,13 @@ abstract class Model {
 		$fields = $this->fields();
 		foreach ($fields as $name => $field) {
 			$class = array_shift($field);
+			$fieldName = trim($name, '@!');
+
 			/** @var \Phlex\RedFox\Field $field */
-			$field = new $class(...$field);
+			$field = new $class($this->entityClass, $fieldName, ...$field);
 			if ( strpos($name, '@') !== false ) $field->readonly(true);
-			$name = trim($name, '@!');
-			$this->fields[$name] = $field;
+
+			$this->fields[$fieldName] = $field;
 		}
 		$this->relations();
 		$this->attachments();
