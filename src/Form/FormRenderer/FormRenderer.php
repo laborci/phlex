@@ -37,11 +37,15 @@ class FormRenderer {
 	protected function renderFields() {
 		foreach ($this->form->fields as $field) {
 			if ($field->testConditions($this->form)) {
-				echo '<div role="px-field">';
-				echo '<label for="px-input-"' . $field->name . '">' . $field->input->label . '</label>';
-				$field->input->render();
-				echo '<div role="px-field-message" for="' . $field->name . '"></div>';
-				echo '</div>';
+				if ($field->input->render) {
+					echo '<div role="px-field">';
+					echo '<label for="' . $field->name . '">' . $field->input->label . '</label>';
+					$field->input->render();
+					echo '<div role="px-field-message" for="' . $field->name . '"></div>';
+					echo '</div>';
+				} else {
+					$field->input->render();
+				}
 			}
 		}
 	}

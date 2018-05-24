@@ -1,11 +1,13 @@
 <?php namespace Phlex\Form;
 
 use Phlex\Chameleon\JsonResponder;
+use Phlex\RedFox\Entity;
 
 
 abstract class FormAction extends JsonResponder{
 
 	protected $formClass;
+	protected $entityClass;
 	/** @var Form */
 	protected $form;
 
@@ -17,15 +19,14 @@ abstract class FormAction extends JsonResponder{
 
 	public function __construct() {
 		parent::__construct();
-		$formClass = $this->formClass;
-		$this->form = new $formClass();
+		$this->form = new $this->formClass();
 	}
 
 	protected function saveAction($data) {
 		$validatorResult = $this->form->validate($data);
 		if($validatorResult->getStatus()){
 			$result['status'] = 'ok';
-			$this->persist();
+			$this->persist($data);
 		}
 		else{
 			$result['status'] = 'error';
@@ -34,8 +35,21 @@ abstract class FormAction extends JsonResponder{
 		return $result;
 	}
 
-	protected function persist(){
+	protected function persist($data){
+		if($data['id']){
+			/** @var Entity $item */
+			$item = $this->entityClass::repository()->pick($data['id']);
+		}else{
+			/** @var Entity $item */
+			$item = new $this->entityClass();
+		}
+		foreach ($data as $key=>$value){
+			if($key != 'id'){
+				$item->$key = $value;
+			}
+		}
 
+		$item->save();
 	}
 
 }

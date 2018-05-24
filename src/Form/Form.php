@@ -12,8 +12,9 @@ class Form{
 		if(array_key_exists($field, $this->fields)){
 			trigger_error('Duplicate formfield definition', E_USER_WARNING);
 		}
-		$this->fields[$field] = new FormField($field);
-		return $this->fields[$field];
+		$formField  = new FormField($field);
+		$this->fields[$field] = $formField;
+		return $formField;
 	}
 
 	public function applyBindings($data){
