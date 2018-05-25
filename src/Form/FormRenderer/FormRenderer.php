@@ -15,7 +15,7 @@ class FormRenderer {
 
 	public function render() {
 		?>
-		<form role="px-form" title="<?php echo $this->title ?>" action="<?php echo $this->action ?>">
+		<form role="px-form" data-title="<?php echo $this->title ?>" action="<?php echo $this->action ?>">
 			<header>
 				<h1><?php echo $this->title ?></h1>
 				<div role="px-buttons"><?php $this->renderButtons(); ?></div>
