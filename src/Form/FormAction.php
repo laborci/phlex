@@ -12,8 +12,8 @@ abstract class FormAction extends JsonResponder{
 	protected $form;
 
 	protected function respond() {
-		$action = $this->getRequestBag()->get('action').'Action';
-		$data = $this->getRequestBag()->get('data');
+		$action = $this->getJsonParamBag()->get('action').'Action';
+		$data = $this->getJsonParamBag()->get('data');
 		return $this->$action($data);
 	}
 
@@ -26,12 +26,23 @@ abstract class FormAction extends JsonResponder{
 		$validatorResult = $this->form->validate($data);
 		if($validatorResult->getStatus()){
 			$result['status'] = 'ok';
-			$this->persist($data);
+			$result['jobs'] = ['refreshList', 'refresh'];
+			$result['itemId'] = $this->persist($data);
 		}
 		else{
 			$result['status'] = 'error';
 			$result['fieldMessages'] = $validatorResult->getErrors();
 		}
+		return $result;
+	}
+
+	protected function deleteAction($data){
+		/** @var Entity $item */
+		$item = $this->entityClass::repository()->pick($data['id']);
+		$result['status'] = 'ok';
+		$result['itemId'] = $this->persist($data['id']);
+		$item->delete();
+		$result['jobs'] = ['refreshList', 'closeForm'];
 		return $result;
 	}
 
@@ -48,8 +59,8 @@ abstract class FormAction extends JsonResponder{
 				$item->$key = $value;
 			}
 		}
-
 		$item->save();
+		return $item->id;
 	}
 
 }

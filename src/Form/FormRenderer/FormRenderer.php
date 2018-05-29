@@ -7,17 +7,19 @@ class FormRenderer {
 
 	public $action;
 	public $title;
+	public $formUrl;
 
-	public function __construct(Form $form, $title = null) {
+	public function __construct(Form $form, $formUrl, $title = null) {
 		$this->form = $form;
 		$this->title = $title;
+		$this->formUrl = $formUrl;
 	}
 
 	public function render() {
 		?>
-		<form role="px-form" data-title="<?php echo $this->title ?>" action="<?php echo $this->action ?>">
+		<form role="px-form" data-form-url="<?php echo $this->formUrl ?>" data-title="<?php echo $this->title ?>" action="<?php echo $this->action ?>">
 			<header>
-				<h1><?php echo $this->title ?></h1>
+				<h1></h1>
 				<div role="px-buttons"><?php $this->renderButtons(); ?></div>
 			</header>
 			<div role="px-form-message"></div>
