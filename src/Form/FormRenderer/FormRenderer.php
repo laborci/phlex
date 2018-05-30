@@ -17,7 +17,8 @@ class FormRenderer {
 
 	public function render() {
 		?>
-		<form role="px-form" data-form-url="<?php echo $this->formUrl ?>" data-title="<?php echo $this->title ?>" action="<?php echo $this->action ?>">
+		<form role="px-form" data-form-url="<?php echo $this->formUrl ?>" data-title="<?php echo $this->title ?>"
+				action="<?php echo $this->action ?>">
 			<header>
 				<h1></h1>
 				<div role="px-buttons"><?php $this->renderButtons(); ?></div>
@@ -29,11 +30,17 @@ class FormRenderer {
 		</form>
 	<?php }
 
-	protected function renderButtons() {
-		?>
+	protected function renderButtons() { ?>
 		<button role="px-button" action="save"><i style="color:green" class="fa fa-check"></i> Save</button>
-		<button role="px-button" action="delete"><i style="color:darkred" class="fa fa-minus-circle"></i> Delete</button>
-		<button role="px-button" job="refresh"><i style="color:orange" class="fa fa-recycle"></i> Refresh</button>
+		<?php if ($this->form->fields[id]->value) { ?>
+			<?php if ($this->form->hasAttachments) { ?>
+				<button role="px-button" job="attachments"><i style="color:cornflowerblue" class="fa fa-folder"></i> Files
+				</button>
+			<?php } ?>
+			<button role="px-button" action="delete"><i style="color:darkred" class="fa fa-minus-circle"></i> Delete
+			</button>
+			<button role="px-button" job="refresh"><i style="color:orange" class="fa fa-recycle"></i> Refresh</button>
+		<?php } ?>
 	<?php }
 
 	protected function renderFields() {

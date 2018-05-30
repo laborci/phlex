@@ -8,6 +8,9 @@ class Form{
 	/** @var FormField[] */
 	public $fields = [];
 
+	/** @var bool  */
+	public $hasAttachments = false;
+
 	public function add($field):FormField{
 		if(array_key_exists($field, $this->fields)){
 			trigger_error('Duplicate formfield definition', E_USER_WARNING);
