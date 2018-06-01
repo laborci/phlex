@@ -34,6 +34,7 @@ class FormResponder extends HandyResponder {
 		$this->formRenderer = new $this->formRendererClass($form, $this->formUrl);
 		$this->formRenderer->action = $this->actionUrl;
 		$this->formRenderer->title = $this->title();
+		$this->formRenderer->itemId = $this->item->id;
 	}
 
 	protected function title(){
