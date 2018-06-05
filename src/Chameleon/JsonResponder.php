@@ -13,5 +13,9 @@ abstract class JsonResponder extends Responder {
 	protected function respond() { return null; }
 
 	final protected function getJsonPayload(): array { return json_decode($this->getRequest()->getContent(), true); }
-	final protected function getJsonParamBag(): ParameterBag { return new ParameterBag(json_decode($this->getRequest()->getContent(), true)); }
+	final protected function getJsonParamBag(): ParameterBag {
+		$data = json_decode($this->getRequest()->getContent(), true);
+		$data = is_array($data) ? $data : [];
+		return new ParameterBag($data);
+	}
 }

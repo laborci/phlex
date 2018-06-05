@@ -51,11 +51,11 @@ class AttachmentManager{
 
 	public function uploadFile(UploadedFile $file, $replace = false) {
 		if($this->getAttachmentCount() >= $this->descriptor->getMaxFileCount() && !$replace) {
-			throw new Exception("Too many files", Exception::FILE_COUNT_ERROR);
+			throw new Exception("Max number of files: ".$this->descriptor->getMaxFileCount(), Exception::FILE_COUNT_ERROR);
 		}elseif( $file->getClientSize() > $this->descriptor->getMaxFileSize() ) {
-			throw new Exception("Too big file", Exception::FILE_SIZE_ERROR);
-		}elseif( ! in_array($file->getClientOriginalExtension(), $this->descriptor->getAcceptedExtensions() )) {
-			throw new Exception("File type is not accepted", Exception::FILE_TYPE_ERROR);
+			throw new Exception("Max size of files: ".$this->descriptor->getMaxFileSize().'bytes', Exception::FILE_SIZE_ERROR);
+		}elseif( is_array($this->descriptor->getAcceptedExtensions()) && !in_array($file->getClientOriginalExtension(), $this->descriptor->getAcceptedExtensions() )) {
+			throw new Exception("Acceptable filetypes are: ".join(', ', $this->descriptor->getAcceptedExtensions()), Exception::FILE_TYPE_ERROR);
 		}else{
 			if($this->descriptor->getMaxFileCount() == 1 && $this->getAttachmentCount()==1 && $replace){
 				$this->first->delete();
@@ -71,7 +71,7 @@ class AttachmentManager{
 			throw new Exception("Too many files", Exception::FILE_COUNT_ERROR);
 		}elseif( $file->getSize() > $this->descriptor->getMaxFileSize() ) {
 			throw new Exception("Too big file", Exception::FILE_SIZE_ERROR);
-		}elseif( !in_array($file->getExtension(), $this->descriptor->getAcceptedExtensions()) ) {
+		}elseif(is_array($this->descriptor->getAcceptedExtensions()) && !in_array($file->getExtension(), $this->descriptor->getAcceptedExtensions()) ) {
 			throw new Exception("File type is not accepted", Exception::FILE_TYPE_ERROR);
 		}else{
 			if($this->descriptor->getMaxFileCount() == 1 && $this->getAttachmentCount()==1 && $replace){

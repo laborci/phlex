@@ -1,5 +1,6 @@
 <?php namespace Phlex\Form;
 
+use App\ServiceManager;
 use Phlex\Chameleon\JsonResponder;
 use Phlex\RedFox\Entity;
 
@@ -12,8 +13,14 @@ abstract class FormAction extends JsonResponder{
 	protected $form;
 
 	protected function respond() {
-		$action = $this->getJsonParamBag()->get('action').'Action';
-		$data = $this->getJsonParamBag()->get('data');
+		$action = $this->getRequestBag()->get('action');
+		$data = $this->getRequestBag()->get('data');
+		if(!$action) {
+			$action = $this->getJsonParamBag()->get('action');
+			$data = $this->getJsonParamBag()->get('data');
+		}
+		$action.='Action';
+		ServiceManager::getLogger()->info($action);
 		return $this->$action($data);
 	}
 
