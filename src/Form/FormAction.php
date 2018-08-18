@@ -7,13 +7,14 @@ use Phlex\RedFox\Entity;
 use Phlex\RedFox\Model;
 
 
-abstract class FormAction extends JsonResponder{
+class FormAction extends JsonResponder{
 
 	protected $formClass;
 	protected $entityClass;
 	/** @var Form */
 	protected $form;
 
+	
 	protected function respond() {
 		$action = $this->getRequestBag()->get('action');
 		$data = $this->getRequestBag()->get('data');
@@ -28,7 +29,10 @@ abstract class FormAction extends JsonResponder{
 
 	public function __construct() {
 		parent::__construct();
-		$this->form = new $this->formClass();
+		$admin = $this->getAttributesBag()->get('admin');
+		$this->entityClass = $admin->entityClass;
+		$this->formClass = $admin->formClass;
+		$this->form = $admin->getForm();
 	}
 
 	protected function saveAction($data) {
@@ -75,8 +79,6 @@ abstract class FormAction extends JsonResponder{
 
 
 	protected function getAttachmentsAction($data) {
-
-		ServiceManager::getLogger()->info($data);
 
 		/** @var Model $model */
 		$model = $this->entityClass::model();

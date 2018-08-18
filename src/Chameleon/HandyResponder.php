@@ -26,6 +26,9 @@ abstract class HandyResponder extends SmartPageResponder {
 				echo '<link rel="stylesheet" type="text/css" href="'.$this->distFolder().$css.'.css" />'."\n";
 			}
 		}
+	}
+
+	protected function AFTER_BODY() {
 		if (array_key_exists('js', $this->classAnnotations)) {
 			if (!is_array($this->classAnnotations['js'])) $this->classAnnotations['js'] = [$this->classAnnotations['js']];
 			foreach($this->classAnnotations['js'] as $js){

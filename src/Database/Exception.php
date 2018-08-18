@@ -8,7 +8,7 @@
 
 namespace Phlex\Database;
 
-class Exception extends \Exception{
+class Exception extends \Exception {
 	public $sql;
 	public $pdoException;
 

@@ -1,4 +1,4 @@
-<?php namespace Phlex\Form\FormRenderer;
+<?php namespace Phlex\Form;
 
 
 use Phlex\Form\Form;
@@ -18,8 +18,9 @@ class FormRenderer {
 
 	public function render() {
 		?>
-		<form role="px-form" data-form-url="<?php echo $this->formUrl ?>" data-item-id="<?php echo $this->itemId ?>" data-title="<?php echo $this->title ?>"
-				action="<?php echo $this->action ?>">
+		<form role="px-form" data-form-url="<?php echo $this->formUrl ?>" data-item-id="<?php echo $this->itemId ?>"
+		      data-title="<?php echo $this->title ?>"
+		      action="<?php echo $this->action ?>">
 			<header>
 				<h1></h1>
 				<div role="px-buttons"><?php $this->renderButtons(); ?></div>
@@ -34,7 +35,7 @@ class FormRenderer {
 	protected function renderButtons() { ?>
 		<button role="px-button" action="save"><i style="color:green" class="fa fa-check"></i> Save</button>
 		<?php if ($this->form->fields[id]->value) { ?>
-			<?php if ($this->form->hasAttachments) { ?>
+			<?php if ($this->hasAttachments) { ?>
 				<button role="px-button" job="attachments"><i style="color:cornflowerblue" class="fa fa-folder"></i> Files
 				</button>
 			<?php } ?>
@@ -46,8 +47,8 @@ class FormRenderer {
 
 	protected function renderFields() {
 		foreach ($this->form->fields as $field) {
-			if ($field->testConditions($this->form)) {
-				if ($field->input->render) {
+			if (!is_null($field->input) && $field->input->testConditions($this->form)) {
+				if (!$field->input->hidden) {
 					echo '<div role="px-field">';
 					echo '<label for="' . $field->name . '">' . $field->input->label . '</label>';
 					$field->input->render();

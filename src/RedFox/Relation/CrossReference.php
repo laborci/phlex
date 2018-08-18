@@ -4,6 +4,7 @@ use Phlex\Database\DataSource;
 use Phlex\Database\Filter;
 use Phlex\Database\Finder;
 use Phlex\RedFox\Entity;
+use Phlex\RedFox\Repository;
 
 class CrossReference {
 
@@ -25,8 +26,14 @@ class CrossReference {
 		$class = $this->class;
 		$req = new Finder($this->access);
 		$req->select($this->otherField . " as __VALUE__")->from($this->table)->where(Filter::where('`' . $this->selfField . '`=$1', $object->id));
-		$rels = $req->collect();
-		return $class::repository()->collect($rels);
+		$rows = $req->collect();
+		$rels = [];
+		foreach ($rows as $row){
+			$rels[] = $row['__VALUE__'];
+		}
+		/** @var Repository $repository */
+		$repository = $class::repository();
+		return $repository->collect($rels);
 	}
 
 	public function getRelatedClass(): string {

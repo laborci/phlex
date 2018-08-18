@@ -16,7 +16,7 @@ abstract class PageResponder extends Responder {
 		$this->getResponse()->setContent($this->respond())->send();
 	}
 
-	abstract protected function prepare();
+	protected function prepare(){}
 	abstract protected function respond():string;
 	protected function redirect($url = '/', $status = 301){
 		(new RedirectResponse($url, $status, $this->getResponse()->headers->all()))->send();

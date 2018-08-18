@@ -33,8 +33,7 @@ abstract class SmartPageResponder extends TRexPageResponder implements SmartPage
 	}
 
 	protected function writeExtensions() {
-		foreach ($this->extensions as $extension)
-			echo $extension . "\n";
+		foreach ($this->extensions as $extension) echo $extension . "\n";
 		$this->extensions = null;
 	}
 
@@ -62,6 +61,7 @@ abstract class SmartPageResponder extends TRexPageResponder implements SmartPage
 		</head>
 		<body class="{{.bodyClass}}">
 		<?php $this->BODY() ?>
+		<?php $this->AFTER_BODY() ?>
 		</body>
 		</html>
 	<?php }
@@ -72,5 +72,7 @@ abstract class SmartPageResponder extends TRexPageResponder implements SmartPage
 	<?php }
 
 	abstract protected function BODY();
+
+	protected function AFTER_BODY(){}
 
 }

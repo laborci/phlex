@@ -6,7 +6,7 @@ abstract class JsonResponder extends Responder {
 
 	final public function __invoke($method = 'respond') {
 		$this->getResponse()->headers->set('Content-Type', 'application/json');
-		$response = json_encode($this->$method());
+		$response = json_encode($this->$method(), JSON_UNESCAPED_UNICODE);
 		$this->getResponse()->setContent($response)->send();
 	}
 

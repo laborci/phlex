@@ -47,6 +47,9 @@ abstract class Repository {
 		$objects = [];
 		$ids = array_unique($ids);
 		$requested = count($ids);
+		ServiceManager::getLogger()->info($ids);
+		if($requested == 0) return [];
+
 		foreach($ids as $index => $id) {
 			$cached = $this->cache->get($id);
 			if(!is_null($cached)) {

@@ -2,15 +2,22 @@
 
 use Phlex\Chameleon\HandyResponder;
 
-class ListResponder extends HandyResponder {
+/**
+ * @css style
+ * @jsappmodule List
+ */
+class ListPage extends HandyResponder {
 
 	protected $fields = [];
+	protected $admin;
 
 	protected function prepare() {
 		$this->bodyClass = 'list';
+		$this->admin = $this->getAttributesBag()->get('admin');
+		$this->admin->decorateList($this);
 	}
 
-	protected function addField($name, $label=null, $order = true){
+	public function addField($name, $label=null, $order = true){
 		$visible = true;
 		if(is_null($label)) $label = $name;
 		$defaultOrder = is_string($order) ? $order : false;
@@ -19,7 +26,7 @@ class ListResponder extends HandyResponder {
 
 	protected function BODY() { ?>
 		<div role="px-list-head">
-			<h1>{{.listTitle}}</h1>
+			<h1>{{.admin.listTitle}}</h1>
 			<div role="px-list-buttons">
 				<button role="px-list-new"><i style="color:green;" class="fa fa-plus-square"></i> New</button>
 				<!--button><i style="color:gray;" class="fa fa-cogs"></i> Settings</button-->
@@ -32,7 +39,7 @@ class ListResponder extends HandyResponder {
 			</div>
 		</div>
 
-		<div role="px-list" data-target="/form/user/" data-source="/list/user">
+		<div role="px-list" data-target="{{.admin.formUrl}}" data-source="{{.admin.listUrl}}">
 			<div role="px-list-table">
 				<div class="scrollable">
 					<table>

@@ -1,10 +1,15 @@
 <?php namespace Phlex\Form;
 
 use Phlex\Chameleon\HandyResponder;
-use Phlex\Form\FormRenderer\FormRenderer;
+use Phlex\Form\FormRenderer;
 use Phlex\RedFox\Entity;
 
-class FormResponder extends HandyResponder {
+
+/**
+ * @css style
+ * @jsappmodule Form
+ */
+class FormPage extends HandyResponder {
 
 	protected $entityClass;
 	protected $formClass;
@@ -20,6 +25,17 @@ class FormResponder extends HandyResponder {
 	protected $formRenderer;
 
 	protected function prepare() {
+
+		$admin = $this->getAttributesBag()->get('admin');
+
+		$this->entityClass = $admin->entityClass;
+		$this->formClass = $admin->formClass;
+		$this->titleCode = $admin->titleCode;
+		$this->titleField = $admin->titleField;
+		$this->actionUrl = $admin->actionUrl;
+		$this->formUrl = $admin->formUrl;
+		$this->hasAttachments = $admin->hasAttachments;
+
 		$this->bodyClass = 'form';
 
 		$id = $this->getPathBag()->get('id');
@@ -28,10 +44,15 @@ class FormResponder extends HandyResponder {
 		}else{
 			$this->item = $this->entityClass::repository()->pick($id);
 		}
+
 		/** @var Form $form */
-		$form = new $this->formClass();
-		$form->fill($this->convert($this->item));
+		$form = $admin->getForm();
+
+		$data = $admin->itemConverter($this->item);
+
+		$form->fill($data);
 		$this->formRenderer = new $this->formRendererClass($form, $this->formUrl);
+		$this->formRenderer->hasAttachments = $this->hasAttachments;
 		$this->formRenderer->action = $this->actionUrl;
 		$this->formRenderer->title = $this->title();
 		$this->formRenderer->itemId = $this->item->id;
@@ -40,10 +61,6 @@ class FormResponder extends HandyResponder {
 	protected function title(){
 		$titleField = $this->titleField;
 		return '<b>'.$this->titleCode.'</b> '.$this->item->$titleField.' <em>'.($this->item->id ?? 'new').'</em>';
-	}
-
-	protected function convert(Entity $item){
-		return $item->getRawData();
 	}
 
 	protected function BODY() { ?>

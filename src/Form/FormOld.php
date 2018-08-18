@@ -16,10 +16,10 @@ class Form {
 		if ($addIdField) {
 			$this->add('id')
 				->bind()
-				->setInput('id', 'hidden')
+				->setInput((new HiddenInput('Id')))
 				->addCondition(function ($form) {
 					return (bool)$this->fields['id']->value;
-				})->hidden();
+				});
 		}
 	}
 
@@ -51,14 +51,17 @@ class Form {
 	}
 
 	public function validate($data) {
+
 		$result = new ValidatorResult();
+
 		foreach ($this->fields as $field) {
 			if (array_key_exists($field->name, $data)) {
 				$field->validate($data[$field->name], $result);
 			}
 		}
-		return $result;
-	}
 
+		return $result;
+
+	}
 
 }
