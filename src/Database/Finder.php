@@ -1,5 +1,7 @@
 <?php namespace Phlex\Database;
 
+use App\ServiceManager;
+
 /**
  * Class Request
  */

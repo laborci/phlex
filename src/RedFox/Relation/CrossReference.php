@@ -1,5 +1,6 @@
 <?php namespace Phlex\RedFox\Relation;
 
+use App\ServiceManager;
 use Phlex\Database\DataSource;
 use Phlex\Database\Filter;
 use Phlex\Database\Finder;
@@ -23,20 +24,36 @@ class CrossReference {
 	}
 
 	public function __invoke(Entity $object) {
-		$class = $this->class;
-		$req = new Finder($this->access);
-		$req->select($this->otherField . " as __VALUE__")->from($this->table)->where(Filter::where('`' . $this->selfField . '`=$1', $object->id));
-		$rows = $req->collect();
-		$rels = [];
-		foreach ($rows as $row){
-			$rels[] = $row['__VALUE__'];
-		}
+		$relatedIds = $this->getRelatedIds($object);
 		/** @var Repository $repository */
-		$repository = $class::repository();
-		return $repository->collect($rels);
+		$repository = $this->class::repository();
+		return $repository->collect($relatedIds);
+	}
+
+	public function getRelatedIds(Entity $object){
+		return $this->access->getValues("SELECT ".$this->otherField." FROM ".$this->table." WHERE ".$this->selfField."=$1", $object->id);
 	}
 
 	public function getRelatedClass(): string {
 		return '\\'.$this->class.'[]';
+	}
+
+	public function store(Entity $item, $ids, $delete = true){
+		$relateds = $this->getRelatedIds($item);
+		$toDeletes = array_values(array_diff($relateds, $ids));
+		$toAdds = array_values(array_diff($ids, $relateds));
+
+		foreach ($toAdds as $toAdd) {
+			$this->access->insert($this->table, [
+				$this->selfField => $item->id,
+				$this->otherField => $toAdd
+			]);
+		}
+
+		foreach ($toDeletes as $toDelete){
+			$this->access->delete($this->table,
+				Filter::where($this->selfField.'='.$item->id)
+					->and($this->otherField."=$1", $toDelete));
+		}
 	}
 }

@@ -7,10 +7,10 @@ use Phlex\Database\Finder;
 
 abstract class Repository {
 
-	/** @var \Phlex\Database\DataSource  */
+	/** @var \Phlex\Database\DataSource */
 	protected $dataSource;
 	protected $entityClass;
-	/** @var \Phlex\RedFox\Cache  */
+	/** @var \Phlex\RedFox\Cache */
 	protected $cache;
 
 	public function __construct(DataSource $dataSource, string $entityClass) {
@@ -19,7 +19,7 @@ abstract class Repository {
 		$this->cache = new Cache();
 	}
 
-	private function addToCache(Entity $object){
+	private function addToCache(Entity $object) {
 		$this->cache->add($object);
 	}
 
@@ -28,50 +28,52 @@ abstract class Repository {
 	 * @return \Phlex\Database\DataSource
 	 */
 
-	public function getDataSource():DataSource{ return $this->dataSource; }
+	public function getDataSource(): DataSource { return $this->dataSource; }
 
 	public function pick(int $id, bool $strict = true) {
 		$cached = $this->cache->get($id);
-		if(!is_null($cached)) return $cached;
+		if (!is_null($cached)) return $cached;
 		$data = $this->dataSource->pick($id);
-		if($data){
+		if ($data) {
 			$object = new $this->entityClass($data, $this);
 			$this->addToCache($object);
 			return $object;
 
-		}if($strict) $this->throwExceptionOnEmpty($data);
+		}
+		if ($strict) $this->throwExceptionOnEmpty($data);
 		return null;
 	}
 
-	public function collect(array $ids, bool $strict = true) {
+	public function collect(array $ids, $map = false) {
 		$objects = [];
 		$ids = array_unique($ids);
 		$requested = count($ids);
-		ServiceManager::getLogger()->info($ids);
-		if($requested == 0) return [];
+		if ($requested == 0) return [];
 
-		foreach($ids as $index => $id) {
+		foreach ($ids as $index => $id) {
 			$cached = $this->cache->get($id);
-			if(!is_null($cached)) {
+			if (!is_null($cached)) {
 				$objects[] = $cached;
 				unset($ids[$index]);
 			}
 		}
-		if(count($ids)) {
+		if (count($ids)) {
 			$data = $this->dataSource->collect($ids);
-			foreach($data as $row) {
-				$object =  new $this->entityClass($row, $this);
+			foreach ($data as $row) {
+				$object = new $this->entityClass($row, $this);
 				$this->addToCache($object);
 				$objects[] = $object;
 			}
 		}
-		if($strict && ($requested !== count($objects))) throw new RepositoryException('', RepositoryException::MISSING_RESULT);
-		return $objects;
+		if ($map) {
+			return array_map(function (Entity $item) { return [$item->id => $item->__toString()]; }, $objects);
+		} else {
+			return $objects;
+		}
 	}
 
-	protected function count(Filter $filter = null){
-		$count =  array_pop($this->getDatabaseFinder()->select("count(id)")->from($this->dataSource->getTable())->where($filter)->pick());
-		ServiceManager::getLogger()->info($count);
+	protected function count(Filter $filter = null) {
+		$count = array_pop($this->getDatabaseFinder()->select("count(id)")->from($this->dataSource->getTable())->where($filter)->pick());
 		return $count;
 	}
 
@@ -86,30 +88,40 @@ abstract class Repository {
 		$this->dataSource->update($data['id'], $data);
 	}
 
-	public function delete(Entity $object){
+	public function delete(Entity $object) {
 		$this->cache->delete($object->id);
 		$this->dataSource->delete($object->id);
 	}
 
-	private function getDatabaseFinder():Finder {
-		return new Finder($this->dataSource->getAccess() );
+	private function getDatabaseFinder(): Finder {
+		return new Finder($this->dataSource->getAccess());
 	}
 
-	public function search(Filter $filter = null) {
+	public function search(Filter $filter = null, $map = false) {
 		$table = $this->dataSource->getAccess()->escapeSQLEntity($this->dataSource->getTable());
-		return $this->getDatabaseFinder()
-				->select($table.'.*')
-				->from($table)
-				->setConverter(function ($record){
-					$object = new $this->entityClass($record, $this);
-					$this->addToCache($object);
-					return $object;
-				})
-				->where($filter);
+		$finder = $this->getDatabaseFinder()
+			->select($table . '.*')
+			->from($table)
+			->where($filter);
+		if ($map === false) return $finder->setConverter(function ($record) {
+			$object = new $this->entityClass($record, $this);
+			$this->addToCache($object);
+			return $object;
+		});
+		else return $finder
+			->setConverter(function ($record) {
+				$object = new $this->entityClass($record, $this);
+				$this->addToCache($object);
+				return ['key'=>$object->id, 'value'=>$object->__toString()];
+			});
 	}
 
-	protected function throwExceptionOnEmpty($items){
-		if(is_null($items) || (is_array($items) && !count($items))){
+	public function searchMap(Filter $filter = null){
+		return $this->search($filter, true);
+	}
+
+	protected function throwExceptionOnEmpty($items) {
+		if (is_null($items) || (is_array($items) && !count($items))) {
 			throw new RepositoryException('', RepositoryException::EMPTY_RESULT);
 		}
 		return $items;
