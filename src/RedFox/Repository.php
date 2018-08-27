@@ -103,21 +103,27 @@ abstract class Repository {
 			->select($table . '.*')
 			->from($table)
 			->where($filter);
-		if ($map === false) return $finder->setConverter(function ($record) {
-			$object = new $this->entityClass($record, $this);
-			$this->addToCache($object);
-			return $object;
-		});
-		else return $finder
-			->setConverter(function ($record) {
+		if ($map === false) {
+			return $finder->setConverter(function ($record) {
 				$object = new $this->entityClass($record, $this);
 				$this->addToCache($object);
-				return ['key'=>$object->id, 'value'=>$object->__toString()];
+				return $object;
 			});
+		}else{
+			if($map === true){
+				$map = ['key', 'value'];
+			}
+			return $finder
+				->setConverter(function ($record) use ($map){
+					$object = new $this->entityClass($record, $this);
+					$this->addToCache($object);
+					return [$map[0]=>$object->id, $map[1]=>$object->__toString()];
+				});
+		}
 	}
 
-	public function searchMap(Filter $filter = null){
-		return $this->search($filter, true);
+	public function searchMap(Filter $filter = null, $keys = ['key', 'value']){
+		return $this->search($filter, $keys);
 	}
 
 	protected function throwExceptionOnEmpty($items) {

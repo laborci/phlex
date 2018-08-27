@@ -49,24 +49,39 @@ class Router {
 	 * @param array $attributes
 	 * @return $this|Handler
 	 */
-	public function route($method, $pattern, $pageResponderClass = null, $attributes = []) {
+	public function route($method, $patterns, $pageResponderClass = null, $attributes = []) {
 
 		if ($this->request->isMethod($method)) {
 			$uri = rtrim($this->request->getPathInfo(), '/');
 			if (!$uri) $uri = '/';
 
-			$patternParts = explode('|', $pattern);
-
-			$patterns = [];
-			if(count($patternParts)>1) {
-				$p = '';
-				for ($i = 0; $i < count($patternParts); $i++) {
-					$p.=$patternParts[$i];
-					array_unshift($patterns, $p);
-				}
-			}else{
-				$patterns[] = $pattern;
+			if(!is_array($patterns)){
+				$patterns = [$patterns];
 			}
+
+			foreach ($patterns as $pattern){
+				$patternParts = explode('|', $pattern);
+				if(count($patternParts)>1) {
+					$patternConstruction = '';
+					for ($i = 0; $i < count($patternParts); $i++) {
+						$patternConstruction.=$patternParts[$i];
+						$patterns[] = $patternConstruction;
+					}
+				}
+			}
+//       // to recover rename arg pattern to patterns
+//			$patternParts = explode('|', $pattern);
+//
+//			$patterns = [];
+//			if(count($patternParts)>1) {
+//				$p = '';
+//				for ($i = 0; $i < count($patternParts); $i++) {
+//					$p.=$patternParts[$i];
+//					array_unshift($patterns, $p);
+//				}
+//			}else{
+//				$patterns[] = $pattern;
+//			}
 
 			foreach($patterns as $pattern) {
 				if ($this->testPattern($pattern, $uri)) {
@@ -106,6 +121,7 @@ class Router {
 			$valuepattern = '@^' . preg_replace('/{.*?}/', '(.*?)', $pattern) . '$@';
 			preg_match($valuepattern, $uri, $values);
 			array_shift($values);
+			$values = array_map(function($value){return urldecode($value);}, $values);
 			$params = array_combine($keys, $values);
 			return $params;
 		} else {

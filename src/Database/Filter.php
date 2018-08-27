@@ -7,6 +7,22 @@ class Filter {
 
 	protected $where = Array();
 
+	const LIKE_STARTSWITH = 1;
+	const LIKE_ENDSWITH = 2;
+	const LIKE_INSTRING = 3;
+
+	static function like($string, $mode = self::LIKE_INSTRING){
+		if($mode & self::LIKE_STARTSWITH) $string = '%'.$string;
+		if($mode & self::LIKE_ENDSWITH) $string = $string.'%';
+		return $string;
+	}
+
+	static function explode($string, $delimeter = ',', $trim = true){
+		$array = explode($delimeter, $string);
+		if($trim) $array = array_map('trim', $array);
+		return $array;
+	}
+
 	/**
 	 * @param string $sql
 	 * @param mixed  $sqlParams
@@ -123,7 +139,8 @@ class Filter {
 				$sql[] = $access->buildSQL(" `" . $key . "` IN ($1) ", $value);
 			else $sql[] = $access->buildSQL(" `" . $key . "` = $1 ", $value);
 		}
-		return implode(' AND ', $sql);
+		$completeSql = implode(' AND ', $sql);
+		return $completeSql;
 	}
 
 	/**
