@@ -22,6 +22,17 @@ abstract class HandyResponder extends SmartPageResponder {
 		$this->classAnnotations = (new Annotations($reflector))->asArray();
 	}
 
+	protected function template() {
+		$this->setCustomtagNamespace();
+		if (array_key_exists('title', $this->classAnnotations)) {
+			echo '<?php $this->title = "'.$this->classAnnotations['title'].'"; ?>';
+		}
+		if (array_key_exists('bodyclass', $this->classAnnotations)) {
+			echo '<?php $this->bodyClass = "'.$this->classAnnotations['bodyclass'].'"; ?>';
+		}
+		$this->HTML();
+	}
+
 	protected function HEAD(){
 		parent::HEAD();
 		if (array_key_exists('css', $this->classAnnotations)) {

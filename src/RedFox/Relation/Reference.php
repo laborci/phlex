@@ -27,7 +27,7 @@ class Reference {
 		$field = $this->field;
 		/** @var \Phlex\RedFox\Repository $repository */
 		$repository = $class::repository();
-		return $repository->pick($object->$field);
+		return is_null($object->$field) ? null : $repository->pick($object->$field);
 	}
 
 	/**

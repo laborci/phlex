@@ -11,7 +11,7 @@ abstract class SmartPageResponder extends TRexPageResponder implements SmartPage
 	protected $title = '';
 
 	protected function getServerData() { return $this->serverData; }
-	protected function getServerDataScript() { return '<script> var serverData = ' . json_encode($this->serverData) . ';</script>'; }
+	protected function getServerDataScript() { return count($this->serverData) ? '<script> var serverData = ' . json_encode($this->serverData) . ';</script>' : ''; }
 	protected function addServerData($key, $value) { $this->serverData[ $key ] = $value; }
 
 	public function addMeta($name, $content, $useProperty = false) {
@@ -39,7 +39,7 @@ abstract class SmartPageResponder extends TRexPageResponder implements SmartPage
 
 	protected function customtagNamespace() { return null; }
 
-	private function setCustomtagNamespace() {
+	protected function setCustomtagNamespace() {
 		$ns = $this->customtagNamespace();
 		if (!is_null($ns)) {
 			echo '@ctns ' . str_replace('.', '\\', $ns) . "\n";
@@ -70,6 +70,7 @@ abstract class SmartPageResponder extends TRexPageResponder implements SmartPage
 		<title>{{.title}}</title>
 		<meta charset="utf-8">
 	<?php }
+
 
 	abstract protected function BODY();
 
