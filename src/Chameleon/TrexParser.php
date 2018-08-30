@@ -2,8 +2,8 @@
 
 
 use App\Env;
-use Phlex\Parser\TRex;
 use App\ServiceManager;
+use Phlex\Parser\TRex\TRex;
 
 
 trait TrexParser {
@@ -13,14 +13,14 @@ trait TrexParser {
 		/** @var \Phlex\Sys\FileCache $templateCache */
 		$templateCache = ServiceManager::get('cache.template');
 
-		if (!$templateCache->exists($key) || $this->isDevAndDirty($key)) {
+		if (!$templateCache->exists($key) || $this->isDevAndDirty($key) || true) {
 			ob_start();
 			$this->prepareParser();
 			$this->$method();
 			$template = ob_get_clean();
 			$ref = new \ReflectionClass($this);
 			$template = '@ctns '.$ref->getNamespaceName()."\n".$template;
-			$output = TRex::parseString($template);
+			$output = TRex::parse($template);
 			$templateCache->set($key, $output);
 		}
 

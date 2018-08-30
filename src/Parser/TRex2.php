@@ -1,22 +1,51 @@
 <?php namespace Phlex\Parser;
 
+use App\ServiceManager;
+use zpt\anno\Annotations;
+
 class TRex{
 
 	protected $uses = [];
 	protected $ctns = null;
+	protected $commands = [];
+
 
 	public static function parseString($string){
 		$parser = new static();
-		$output = $parser->parse($string);
-		$lines = explode("\n", $output);
-		$output = '';
-		foreach ($lines as $line) if(trim($line)) {
-			$output .= trim($line) . "\n";
+		$parser->readAnnotations();
+		return $parser->parse($string);
+	}
+
+	protected function parse($string){
+		$lines = explode("\n", $string);
+		$output = [];
+		foreach ($lines as $line) {
+			$line = trim($line);
+			if (strlen($line)) {
+				$line = trim($this->parseLine($line));
+				if (strlen($line)) $output[] = $line;
+			}
+		}
+		return $this->header().join("\n", $output);
+	}
+
+	protected function header(){
+		if(!is_null($this->ctns)){
+			$output = '<?php namespace '.$this->ctns.';?>'.$output;
+		}
+
+		if(count($this->uses)){
+			$uses = '<?php'."\n";
+			foreach ($this->uses as $use){
+				$uses .= 'use '.$use.';'."\n";
+			}
+			$uses.= '?>'."\n";
+			$output = $uses.$output;
 		}
 		return $output;
 	}
 
-	protected function parse($string){
+	/*protected function parse($string){
 		$lines = explode("\n", $string);
 		$output = '';
 
@@ -68,24 +97,128 @@ class TRex{
 			$output = $uses.$output;
 		}
 		return $output;
+	}*/
+
+
+	#region newcode - - - - - - - - - - - - -
+
+
+
+
+
+	protected function readAnnotations(){
+		$reflector = new \ReflectionClass($this);
+		$methods = $reflector->getMethods();
+		foreach($methods as $method){
+
+
+			//$docBlock = (new Annotations($method))->asArray();
+
+			if(substr($method->name, 0, 3) == '___'){
+				$command = substr($method->name, 3);
+				$this->commands[$command] = $method->name;
+			}
+
+			/*if(array_key_exists('gmarkdefaultblock', $docBlock)){
+				$this->defaultBlockMethod = $method->name;
+			}elseif(array_key_exists('gmarkblock', $docBlock) && array_key_exists('command', $docBlock)){
+				$attrType = $method->getParameters()[1]->getType()->__toString();
+				if($attrType !== 'array' and $attrType !== 'string'){
+					throw new \Exception('GMarkParser '.$method->name.' argument $attr type must be string or array, '.$attrType.' given.');
+				}
+				if(array_key_exists('requiredattributes', $docBlock)){
+					$requiredAttributes = preg_split('/\s+/', trim($docBlock['requiredattributes']));
+				}else{
+					$requiredAttributes = [];
+				}
+				$commands = $docBlock['command'];
+				if(is_string($commands)) $commands = [$commands];
+				foreach ($commands as $command){
+					$command = trim($command);
+					list($command, $as) = array_pad(preg_split('/\s+/', $command, 2), 2, null);
+					$as = $as ? $as : $command;
+					$this->commands[$command] = [
+						'method'=>$method->name,
+						'as'=>$as,
+						'requiredAttributes'=>$requiredAttributes,
+						'attrType'=>$attrType
+					];
+				}
+			}*/
+		}
 	}
+
+	private function parseLine($line){
+
+		list($command, $rest) = array_pad(preg_split('/\s+/', $line, 2), 2, null);
+		$command = substr($command, 1);
+
+		if(array_key_exists($command, $this->commands)) {
+			$method = $this->commands[$command];
+			return $this->$method(trim($rest));
+		}
+
+		return $line;
+
+
+
+		/*$command = preg_split('/\s+/', $block, 2)[0];
+		if(array_key_exists($command, $this->commands)){
+			$command = $this->commands[$command];
+			$method = $command['method'];
+			list($commandLine, $body) = array_pad(explode("\n", $block, 2),2, null);
+			$attr = trim(array_pad(preg_split('/\s+/', $commandLine, 2), 2, null)[1]);
+			if($command['attrType'] === 'array'){
+				try{
+					$attr = $this->parseAttributes($attr);
+				}catch (\Throwable $exception){
+					return '<error>ATTRIBUTES COULD NOT BE PARSED in line: '.$commandLine.'</error>';
+				}
+				foreach ($command['requiredAttributes'] as $requiredAttribute){
+					if(!array_key_exists($requiredAttribute, $attr)){
+						return '<error>ATTRIBUTE '.$requiredAttribute.' MISSING in line: '.$commandLine.'</error>';
+					}
+				}
+			}
+			return $this->$method( $body ? $body : '', $attr, $command['as']);
+		}else if($this->defaultBlockMethod){
+			$method = $this->defaultBlockMethod;
+			return $this->$method($block);
+		}*/
+	}
+
+
+
+	protected function ___ctns($line){
+		$this->ctns = str_replace('.','\\', trim($line, ". \t\n\r\0\x0B"));
+		return '';
+	}
+
+	protected function ___use($line){
+		$this->uses[] = trim(str_replace('.','\\',$line));
+		return '';
+	}
+
+	protected function ___php($line){
+		return '<?php '.$line.'?>';
+	}
+
+	protected function ___var($line){
+		return '<?php $'.$line.'?>';
+	}
+
+	#endregion
+
+
+
+
+
+
+
+
+
 
 	#region ONELINERS
-	protected function parseLineCTNS($line){
-		if(substr($line, 0, 5) == '@ctns'){
-			$this->ctns = str_replace('.','\\', trim(substr($line, 6), ". \t\n\r\0\x0B"));
-			$line = '';
-		}
-		return $line;
-	}
-
-	protected function parseLineUSE($line){
-		if(substr($line, 0, 4) == '@use'){
-			$this->uses[] = trim(str_replace('.','\\',substr($line, 4)));
-			$line = '';
-		}
-		return $line;
-	}
 
 	protected function parseLinePHP($line){
 		if(substr($line, 0, 4) == '@php'){
@@ -296,7 +429,7 @@ class TRex{
 		}else{
 			$prefix = '';
 		}
-
+		
 		$firstChar = substr($value, 0, 1);
 		$firstTwoChar = substr($value, 0, 2);
 		if($firstChar == "$" || $firstChar == "'" || $firstChar == '"' || is_numeric($value)){

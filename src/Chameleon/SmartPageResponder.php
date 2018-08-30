@@ -53,13 +53,13 @@ abstract class SmartPageResponder extends TRexPageResponder implements SmartPage
 
 	protected function HTML() { ?>
 		<!doctype html>
-		<html lang="{{.language}}">
+		<html lang="{{language}}">
 		<head>
 			@php echo $this->getServerDataScript();
 			@php $this->writeExtensions();
 			<?php $this->HEAD() ?>
 		</head>
-		<body class="{{.bodyClass}}">
+		<body class="{{bodyClass}}">
 		<?php $this->BODY() ?>
 		<?php $this->AFTER_BODY() ?>
 		</body>
@@ -67,7 +67,7 @@ abstract class SmartPageResponder extends TRexPageResponder implements SmartPage
 	<?php }
 
 	protected function HEAD() { ?>
-		<title>{{.title}}</title>
+		<title>{{title}}</title>
 		<meta charset="utf-8">
 	<?php }
 
