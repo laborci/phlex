@@ -13,7 +13,7 @@ trait TrexParser {
 		/** @var \Phlex\Sys\FileCache $templateCache */
 		$templateCache = ServiceManager::get('cache.template');
 
-		if (!$templateCache->exists($key) || $this->isDevAndDirty($key) || true) {
+		if (!$templateCache->exists($key) || $this->isDevAndDirty($key)) {
 			ob_start();
 			$this->prepareParser();
 			$this->$method();
