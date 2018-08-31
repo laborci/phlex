@@ -42,9 +42,7 @@ class Parser {
 			array_shift($this->tc->items);
 			$this->result->setModifier('!');
 		}
-
 		$this->result->setScope($this->seekScope());
-
 		while ($this->tc->items) {
 			$token = $this->tc->items[0];
 			if ($token->value == '.') {
@@ -57,9 +55,6 @@ class Parser {
 				return $this->result;
 			}else	array_shift($this->tc->items);
 		}
-
-
-
 		return $this->result;
 	}
 
@@ -83,8 +78,6 @@ class Parser {
 	protected function seekArguments() {
 		array_shift($this->tc->items);
 		$arguments = [];
-
-
 		while (count($this->tc->items)) {
 			$token = $this->tc->items[0];
 			if ($token->value == ')') {

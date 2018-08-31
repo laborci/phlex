@@ -16,20 +16,6 @@ class Fang {
 
 	}
 
-	public function parsde(&$line) {
-		if (substr($line, 0, 1) !== $this->commandPrefix) return false;
-		list($command, $rest) = array_pad(preg_split('/\s+/', $line, 2), 2, null);
-		$command = str_replace('-', '', substr($command, 1));
-		ServiceManager::getLogger()->info($command);
-		if (array_key_exists($command, $this->commands)) {
-			$method = $this->commands[$command];
-			$line = $this->$method(trim($rest));
-			ServiceManager::getLogger()->info($line);
-			return true;
-		}
-		return false;
-	}
-
 	public function parse(&$line) {
 		$l = $line;
 
@@ -47,27 +33,6 @@ class Fang {
 		}
 		return false;
 	}
-/*
-	protected function readAnnotations() {
-		$reflector = new \ReflectionClass($this);
-		$methods = $reflector->getMethods();
-		foreach ($methods as $method) {
-			if (substr($method->name, 0, 3) == '___') {
-				$command = substr($method->name, 3);
-				$this->commands[$command] = $method->name;
-			}
-			$docBlock = (new Annotations($method))->asArray();
-			if(array_key_exists('altcommand', $docBlock)) {
-				$commands = $docBlock['altcommand'];
-				if (is_string($commands)) $commands = [$commands];
-				foreach ($commands as $command) {
-					$command = str_replace('-', '', trim($command));
-					$this->commands[$command] = $method->name;
-				}
-			}
-		}
-	}*/
-
 
 	protected function readAnnotations() {
 		$reflector = new \ReflectionClass($this);
