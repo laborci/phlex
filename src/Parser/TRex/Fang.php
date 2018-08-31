@@ -7,11 +7,9 @@ class Fang {
 
 	protected $commands = [];
 	protected $trex;
-	protected $commandPrefix;
 
-	public function __construct(TRex $trex, $commandPrefix = '@') {
+	public function __construct(TRex $trex) {
 		$this->trex = $trex;
-		$this->commandPrefix = $commandPrefix;
 		$this->readAnnotations();
 
 	}
@@ -58,6 +56,14 @@ class Fang {
 	protected function explode($string, $limit = null, $padValue = null, $delimeter = '/\s+/') {
 		return array_pad(preg_split($delimeter, $string, $limit), $limit, $padValue);
 	}
+
+	/**
+	 * @pattern /^\/\/|@rem/
+	 */
+	protected function ___rem($line) {
+		return '';
+	}
+
 
 
 	/**
