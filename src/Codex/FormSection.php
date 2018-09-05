@@ -11,6 +11,14 @@ class FormSection{
 		$this->adminDescriptor = $adminDescriptor;
 	}
 
+
+	/**
+	 * @deprecated use input method instead
+	 * @param $type
+	 * @param $field
+	 * @param array $options
+	 * @return $this
+	 */
 	public function addInput($type, $field, $options = []) {
 		if(is_array($field)){
 			list($field, $label) = $field;
@@ -20,6 +28,17 @@ class FormSection{
 		$input = new Input($type, $label, $field, $options);
 		$this->inputs[] = $input;
 		return $this;
+	}
+
+	public function input($type, $field, $options = []){
+		if(is_array($field)){
+			list($field, $label) = $field;
+		}else{
+			$label = $this->adminDescriptor->getFormDataManager()->getField($field)->label;
+		}
+		$input = new Input($type, $label, $field, $options);
+		$this->inputs[] = $input;
+		return $input;
 	}
 
 	public function get(){

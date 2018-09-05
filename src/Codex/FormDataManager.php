@@ -1,6 +1,12 @@
 <?php namespace Phlex\Codex;
 
+use App\ServiceManager;
 use Phlex\RedFox\Entity;
+use Phlex\RedFox\Fields\BoolField;
+use Phlex\RedFox\Fields\DateField;
+use Phlex\RedFox\Fields\DateTimeField;
+use Phlex\RedFox\Fields\PasswordField;
+use Phlex\RedFox\Fields\SetField;
 use Phlex\RedFox\Model;
 
 class FormDataManager {
@@ -52,15 +58,52 @@ class FormDataManager {
 	}
 
 	protected function extract(Entity $item): array {
-		return $item->getRawData();
+		$data = [];
+		/** @var Model $model */
+		$model = $this->entityClass::model();
+		$fields = $model->getFields();
+
+		foreach ($fields as $name){
+			$field = $model->getField($name);
+			switch (get_class($field)){
+				case DateTimeField::class:
+					$data[$name] = is_null($item->$name) || is_bool($item->$name) ? null : $item->$name->format('Y-m-d\TH:i');
+					break;
+				case DateField::class:
+					$data[$name] = is_null($item->$name) || is_bool($item->$name) ? null : $item->$name->format('Y-m-d');
+					break;
+				case PasswordField::class:
+					$data[$name] = null;
+					break;
+				default:
+					$data[$name] = $item->$name;
+			}
+		}
+		return $data;
+		//		return $item->getRawData();
 	}
 
 	protected function pack(Entity $item, $data) {
 		/** @var Model $model */
 		$model = $this->entityClass::model();
 		foreach ($data as $key => $value) {
+
 			if ($key !== 'id' && $model->fieldWritable($key)) {
-				$item->$key = $value;
+
+				switch (get_class($model->getField($key))){
+					case DateTimeField::class:
+						$item->$key = is_null($item->$key) ? null :  new \DateTime($data[$key]);
+						break;
+					case DateField::class:
+						$item->$key = is_null($item->$key) ? null : new \DateTime($data[$key]);
+						break;
+					case PasswordField::class:
+						if(!is_null($data[$key])) $item->$key = $data[$key];
+						break;
+					default:
+						$item->$key = $value;
+				}
+
 			}
 		}
 	}

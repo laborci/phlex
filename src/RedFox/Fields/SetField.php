@@ -20,8 +20,7 @@ class SetField extends Field{
 	public function export($value){ return join(',',$value); }
 
 	public function set($value){
-		echo 'itt';
-		print_r($value);
+
 		if(count(array_diff($value, $this->options))){
 			throw new \Exception('Set Field type set error');
 		}

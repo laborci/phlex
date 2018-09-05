@@ -6,7 +6,7 @@ class Field {
 	public $label;
 
 	/** @var Validation\Validator[] */
-	protected $validators;
+	protected $validators = [];
 
 	public function __construct($field, $label = null) {
 		$this->field = $field;
