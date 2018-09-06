@@ -18,8 +18,8 @@ class FormDataManager {
 		$this->entityClass = $adminDescriptor->getEntityClass();
 	}
 
-	public function addField($fieldName, $label = null): Field {
-		$field = new Field($fieldName, $label);
+	public function addField($fieldName, $label = null, $default = null): Field {
+		$field = new Field($fieldName, $label, $default);
 		$this->fields[$fieldName] = $field;
 		return $field;
 	}
@@ -54,7 +54,17 @@ class FormDataManager {
 	}
 
 	public function pick($id): Entity {
-		return $id === 'new' ? new $this->entityClass() : $this->entityClass::repository()->pick($id);
+		if($id === 'new'){
+			$item = new $this->entityClass();
+			foreach ($this->fields as $field){
+				$fieldname = $field->field;
+				if(!is_null($field->default)) $item->$fieldname = $field->default;
+			}
+			return $item;
+		}else{
+			return $this->entityClass::repository()->pick($id);
+		}
+		//return $id === 'new' ? new $this->entityClass() : $this->entityClass::repository()->pick($id);
 	}
 
 	protected function extract(Entity $item): array {
