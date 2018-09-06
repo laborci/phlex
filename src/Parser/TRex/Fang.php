@@ -106,6 +106,9 @@ class Fang {
 	#region - - - - EACH AS - - - -
 
 	protected $eachCount = 1;
+	/**
+	 * @pattern /^@each/
+	 */
 	protected function ___each($line) {
 		list($subject, $as, $value, $key, $loop) = $this->explode($line, 5);
 		$iteration = '$__i_' . $eachCount++;
@@ -129,7 +132,9 @@ class Fang {
 		$line .= ' ?>';
 		return $line;
 	}
-
+	/**
+	 * @pattern /^@as/
+	 */
 	protected function ___as($line) {
 		list($value, $key, $loop) = $this->explode($line, 3);
 		$iteration = '$__i_' . $eachCount++;
