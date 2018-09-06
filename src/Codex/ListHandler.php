@@ -24,7 +24,7 @@ class ListHandler {
 		$this->url = $adminDescriptor->getUrl();
 	}
 
-	public function setPageSize(int $pageSize): void { $this->pageSize = $pageSize; }
+	public function setPageSize(int $pageSize) { $this->pageSize = $pageSize; }
 	public function addPlugin($plugin){ $this->plugins[] = $plugin; }
 
 	protected function getRows($page, $sorting, $filter, &$paging){
