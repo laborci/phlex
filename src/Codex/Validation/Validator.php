@@ -7,7 +7,7 @@ abstract class Validator {
 	/** @var Field */
 	protected $field;
 
-	public function setField($field): void { $this->field = $field; }
+	public function setField($field) { $this->field = $field; }
 
 	abstract function validate($data): ValidatorResult;
 
