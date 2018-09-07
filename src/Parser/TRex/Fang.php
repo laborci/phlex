@@ -168,11 +168,19 @@ class Fang {
 	}
 
 	/**
+	 * @pattern /^@elseif/
+	 */
+	protected function ___elseif($line) {
+		$var = $this->claw($line);
+		$line = '<?php }else(' . $var . '){ ?>';
+		return $line;
+	}
+
+	/**
 	 * @pattern /^@else$/
 	 */
 	protected function ___else($line) {
-		$var = $this->claw($line);
-		$line = '<?php }elseif(' . $var . '){ ?>';
+		$line = '<?php }else{ ?>';
 		return $line;
 	}
 
