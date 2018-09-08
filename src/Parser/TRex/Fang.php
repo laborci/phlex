@@ -111,7 +111,7 @@ class Fang {
 	 */
 	protected function ___each($line) {
 		list($subject, $as, $value, $key, $loop) = $this->explode($line, 5);
-		$iteration = '$__i_' . $eachCount++;
+		$iteration = '$__i_' . $this->eachCount++;
 		$line = '<?php ' . $iteration . ' = ' . $this->claw($subject) . ';';
 		if (is_null($as)) {
 			$line .= 'if(is_array(' . $iteration . ') and count(' . $iteration . ')){ ?>';
@@ -137,7 +137,7 @@ class Fang {
 	 */
 	protected function ___as($line) {
 		list($value, $key, $loop) = $this->explode($line, 3);
-		$iteration = '$__i_' . $eachCount++;
+		$iteration = '$__i_' . $this->eachCount++;
 
 		if (!is_null($loop)) {
 			$line .= '$' . $loop . ' = ["count"=>count(' . $iteration . '), "index"=>-1, "number"=>0];';
@@ -172,7 +172,7 @@ class Fang {
 	 */
 	protected function ___elseif($line) {
 		$var = $this->claw($line);
-		$line = '<?php }else(' . $var . '){ ?>';
+		$line = '<?php }elseif(' . $var . '){ ?>';
 		return $line;
 	}
 

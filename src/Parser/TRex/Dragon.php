@@ -96,9 +96,10 @@ class Dragon {
 	#region - - - - CUSTOMTAG - - - -
 
 	/**
-	 * @pattern /<ct:([\w\d\\\\_]+)((\s+[\w\d-:]+="((\\"|.)*?)")*)\s*\/?>/
+	 * @pattern /<ct:([\w\d\\\\_]+)((\s+[\w\d-\.]+="((\\"|.)*?)")*)\s*\/?>/
 	 */
 	protected function ___customtag($customtagClass, $customtagAttributes){
+		ServiceManager::getLogger()->info($customtagClass);
 		$attributes = $this->parseCustomTagAttributes($customtagAttributes);
 		return '<?php '.$customtagClass.'::show('.$attributes.', $this); ?>';
 	}
