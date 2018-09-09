@@ -64,7 +64,7 @@ class ServiceFactory{
 						$annotations = (new Annotations($property))->asArray();
 						if(array_key_exists('var', $annotations) && substr($annotations['var'], -7) === ' inject'){
 							$property->setAccessible(true);
-							$service->{$property->name} = \App\ServiceManager::get(substr($annotations['var'], 0,-7));
+							$property->setValue($service, \App\ServiceManager::get(substr($annotations['var'], 0,-7)));
 							$property->setAccessible(false);
 						}
 					}
