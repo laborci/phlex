@@ -17,7 +17,7 @@ abstract class Customtag implements SmartPageComponentInterface {
 		$this->respond();
 	}
 
-	abstract protected function prepare();
+	protected function prepare(){}
 
 	public function addJsInclude($src) {
 		if (!is_null($this->parent))

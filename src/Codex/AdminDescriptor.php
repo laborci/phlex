@@ -57,6 +57,9 @@ abstract class AdminDescriptor {
 		$router->post($options['url'] . 'form/{id}', Responder\FormResponder::class, ['admin' => static::class, 'method' => 'save']);
 		$router->get($options['url'] . '{id}/attachments', Responder\AttachmentsResponder::class, ['admin' => static::class, 'method' => 'get']);
 		$router->post($options['url'] . '{id}/attachments', Responder\AttachmentsResponder::class, ['admin' => static::class, 'method' => 'upload']);
+		$router->post($options['url'] . '{id}/attachments/rename', Responder\AttachmentsResponder::class, ['admin' => static::class, 'method' => 'rename']);
+		$router->post($options['url'] . '{id}/attachments/copy', Responder\AttachmentsResponder::class, ['admin' => static::class, 'method' => 'copy']);
+		$router->post($options['url'] . '{id}/attachments/move', Responder\AttachmentsResponder::class, ['admin' => static::class, 'method' => 'move']);
 		$router->delete($options['url'] . '{id}/attachments', Responder\AttachmentsResponder::class, ['admin' => static::class, 'method' => 'delete']);
 
 	}

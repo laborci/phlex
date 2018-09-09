@@ -22,10 +22,11 @@ class TRex {
 	}
 
 	protected function parseString($string){
-		$lines = explode("\n", $string);
+		$lines = explode("\n", "\n".$string."\n");
 		$output = [];
 		foreach ($lines as $line) {
 			$line = trim($line);
+			ServiceManager::getLogger()->info($line);
 			if($this->fang->parse($line)){
 				$output[] = $line;
 			}else{
