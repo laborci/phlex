@@ -1,5 +1,7 @@
 <?php namespace Phlex\Sys\ServiceManager;
 
+use zpt\anno\Annotations;
+
 class ServiceFactory{
 
 	protected $name;
@@ -54,6 +56,18 @@ class ServiceFactory{
 						}
 					}
 					$service = new $class(...$arguments);
+				}elseif($reflect->implementsInterface(LazyInjectDependencies::class)) {
+					$service = new $class();
+					$properties = $reflect->getProperties();
+					foreach ($properties as $property){
+						$comment = $property->getDocComment();
+						$annotations = (new Annotations($property))->asArray();
+						if(array_key_exists('var', $annotations) && substr($annotations['var'], -7) === ' inject'){
+							$property->setAccessible(true);
+							$service->{$property->name} = \App\ServiceManager::get(substr($annotations['var'], 0,-7));
+							$property->setAccessible(false);
+						}
+					}
 				}else{
 					$service = new $class(...$this->arguments);
 				};
