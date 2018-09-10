@@ -66,7 +66,10 @@ class FormResponder extends JsonResponder {
 		/** @var Entity $item */
 		$item = $entityClass::repository()->pick($id);
 		try {
-			$item->delete();
+			if(!$item->delete()){
+				$this->getResponse()->setStatusCode(422);
+				$this->response->addMessage('Nem sikerült törölni!');
+			}
 		} catch (\Exception $exception) {
 			$this->getResponse()->setStatusCode(422);
 			$this->response->addMessage('Hiba történt a törlés közben. Ellenőrizd az adatokat!');

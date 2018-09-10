@@ -26,7 +26,6 @@ class TRex {
 		$output = [];
 		foreach ($lines as $line) {
 			$line = trim($line);
-			ServiceManager::getLogger()->info($line);
 			if($this->fang->parse($line)){
 				$output[] = $line;
 			}else{

@@ -38,6 +38,7 @@ abstract class Entity implements \JsonSerializable {
 			$this->deleted = true;
 			$this->onDelete();
 		}
+		return true;
 	}
 
 	public function save() {
