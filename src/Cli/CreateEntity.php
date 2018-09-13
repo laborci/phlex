@@ -2,6 +2,7 @@
 
 use App\Env;
 use CaseHelper\CaseHelperFactory;
+use Phlex\Database\Access;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
@@ -23,83 +24,203 @@ class CreateEntity extends Command{
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
-		$style = new SymfonyStyle($input, $output);
+		$this->output = new SymfonyStyle($input, $output);
+		$this->output->title('Creating entity: '.$name);
+
 		$name = ucfirst($input->getArgument('name'));
 		$database = $input->getArgument('database');
 		$table = $input->getArgument('table');
-
-		$style->title('Creating entity: '.$name);
-
-
-		$style->write('Creating files ... ');
-		$root = Env::get('path_root');
-		$dir = 'App/Entity/'.$name;
-		if(!is_dir($root.$dir)){
-			mkdir($root.$dir);
-		}
-
-		$file = $dir.'/'.$name.'.php';
-		if(!file_exists($root.$file)){
-			file_put_contents($root.$file, $this->getEntityClass($name));
-		}
-
-		$file = $dir.'/'.$name.'Repository.php';
-		if(!file_exists($root.$file)){
-			file_put_contents($root.$file, $this->getRepositoryClass($name));
-		}
-
-		$file = $dir.'/'.$name.'Model.php';
-		if(!file_exists($root.$file)){
-			file_put_contents($root.$file, $this->getModelClass($name, $database, $table));
-		}
-
-		$style->writeln('done.');
-
-		$command = $this->getApplication()->find('px:update-entity');
-		$updateInput = new ArrayInput(['command' => 'px:update-entity', 'name' => $name]);
-		$command->run($updateInput, $output);
-
-		$style->writeln('');
-
-	}
-
-	protected function parseBlock($docblock){
-		$lines = explode("\n", $docblock);
-		$block = [];
-		foreach($lines as $line){
-			$line = ltrim(trim($line), " \t*");
-			$block[] = $line;
-		}
-		return $block;
-	}
-
-	protected function getEntityClass($name){
-		$class = file_get_contents(__DIR__.'/../../templates/entity/entity.template');
-		$class = str_replace('{{name}}', $name, $class);
-		return $class;
-	}
-
-	protected function getRepositoryClass($name){
-		$class = file_get_contents(__DIR__.'/../../templates/entity/repository.template');
-		$class = str_replace('{{name}}', $name, $class);
-		return $class;
-	}
-	protected function getDataSourceClass($name, $database, $table){
-		$class = file_get_contents(__DIR__.'/../../templates/entity/dataSource.template');
-		$class = str_replace('{{name}}', $name, $class);
-		$class = str_replace('{{table}}', $table, $class);
-		$class = str_replace('{{database}}', $database, $class);
-		return $class;
-	}
-
-	protected function getModelClass($name, $database, $table){
 		$table = is_null($table) ? CaseHelperFactory::make(CaseHelperFactory::INPUT_TYPE_CAMEL_CASE)->toSnakeCase($name) : $table;
 		$database = is_null($database) ? 'database' : $database;
-		$class = file_get_contents(__DIR__.'/../../templates/entity/model.template');
-		$class = str_replace('{{name}}', $name, $class);
-		$class = str_replace('{{table}}', $table, $class);
-		$class = str_replace('{{database}}', $database, $class);
-		return $class;
+
+		$root = Env::get('path_root');
+		$entityDirectory = $root.'App/Entity/'.$name;
+		$entityHelperDirectory = $entityDirectory.'/Helpers';
+		$templateDirectory = __DIR__.'/../../templates/redfox';
+
+
+		if(!is_dir($entityDirectory)) mkdir($entityDirectory);
+		if(!is_dir($entityHelperDirectory)) mkdir($entityHelperDirectory);
+
+		$dictionary = [
+			'name'=>$name,
+			'database'=>$database,
+			'table'=>$table
+		];
+
+		$this->translateFile($entityDirectory.'/'.$name.'.php', $templateDirectory.'/entity.template.php', $dictionary);
+		$this->translateFile($entityDirectory.'/'.$name.'Repository.php', $templateDirectory.'/repository.template.php', $dictionary);
+		$this->translateFile($entityDirectory.'/'.$name.'Model.php', $templateDirectory.'/model.template.php', $dictionary);
+		$this->translateFile($entityDirectory.'/Helpers/source.php', $templateDirectory.'/Helpers/source.template.php', $dictionary);
+		$this->translateFile($entityDirectory.'/Helpers/RepositoryTrait.php', $templateDirectory.'/Helpers/RepositoryTrait.template.php', $dictionary);
+		$this->translateFile($entityDirectory.'/Helpers/EntityTrait.php', $templateDirectory.'/Helpers/EntityTrait.template.php', $dictionary);
+		$this->translateFile($entityDirectory.'/Helpers/Finder.php', $templateDirectory.'/Helpers/Finder.template.php', $dictionary);
+		$this->translateFile($entityDirectory.'/Helpers/fields.php', $templateDirectory.'/Helpers/fields.template.php', $dictionary);
+
+		$this->updateFields($database, $table, $entityDirectory.'/Helpers/fields.php');
+
+		$this->createModelTrait($database, $table, $name,
+			$templateDirectory.'/Helpers/ModelTrait.template.php',
+			$entityDirectory.'/Helpers/ModelTrait.php');
+
+		$this->createEntityInterface($database, $table, $name,
+			$templateDirectory.'/Helpers/EntityInterface.template.php',
+			$entityDirectory.'/Helpers/EntityInterface.php');
+
+		$this->createEntityTrait($database, $table, $name,
+			$templateDirectory.'/Helpers/EntityTrait.template.php',
+			$entityDirectory.'/Helpers/EntityTrait.php');
+
+		$this->output->writeln('');
+
+	}
+
+	protected function createEntityTrait($database, $table, $name, $source, $destination){
+		$fields = '';
+		$class = "\\App\\Entity\\".$name."\\".$name;
+		/** @var \Phlex\RedFox\Model $model */
+		$model = $class::model();
+
+		$generatedLines = [];
+
+		$fields = $model->getFields();
+		foreach ($fields as $field){
+			$fieldObj = $model->getField($field);
+			$generatedLines[] = ' * @property'.($fieldObj->readonly() ? '-read' : '').' '.$fieldObj->getDataType().' $'.$field;
+		}
+
+		$relations = $model->getRelations();
+		foreach ($relations as $relation){
+			$relationObj = $model->getRelation($relation);
+			$generatedLines[] = ' * @property-read'.' '.$relationObj->getRelatedClass().' $'.$relation;
+			if($relationObj instanceof BackReference){
+				$generatedLines[] = ' * @method'.' '.$relationObj->getRelatedClass().' '.$relation.'($order=null, $limit=null, $offset=null)';
+			}
+		}
+
+		$attahcmentGroups = $model->getAttachmentGroups();
+		foreach ($attahcmentGroups as $attahcmentGroup){
+			$generatedLines[] = ' * @property-read \\Phlex\\RedFox\\Attachment\\AttachmentManager $'.$attahcmentGroup;
+		}
+
+		$fields = join("\n", $generatedLines);
+
+		$dictionary = [
+			'name'=>$name,
+			'database'=>$database,
+			'table'=>$table,
+			'fields'=>$fields
+		];
+		$this->translateFile($destination, $source, $dictionary, true);
+	}
+
+	protected function createEntityInterface($database, $table, $name, $source, $destination){
+		$constants = '';
+		$access = new Access(Env::get($database));
+		foreach ($access->getFieldData($table) as $db_field) {
+			$label = $db_field['Field'];
+			$options = $access->getEnumValues($table, $db_field['Field']);
+			foreach ($options as $option){
+				$constant = str_replace(' ', '_', strtoupper($label.'_'.$option));
+				$constants.= "\tconst $constant = '$option';\n";
+			}
+		}
+		$dictionary = [
+			'name'=>$name,
+			'database'=>$database,
+			'table'=>$table,
+			'constants'=>$constants
+		];
+		$this->translateFile($destination, $source, $dictionary, true);
+	}
+
+	protected function createModelTrait($database, $table, $name, $source, $destination){
+		$fields = '';
+		$access = new Access(Env::get($database));
+		foreach ($access->getFieldData($table) as $db_field) {
+			$type = $this->selectRedfoxField($db_field['Type'], $db_field['Field']);
+			$label = $db_field['Field'];
+			$fields .= ' * px: @property-read '.$type.' $'.$label."\n";
+		}
+
+		$dictionary = [
+			'name'=>$name,
+			'database'=>$database,
+			'table'=>$table,
+			'fields'=>$fields
+		];
+		$this->translateFile($destination, $source, $dictionary, true);
+	}
+
+	protected function translateFile( $destination, $source, $dictionary, $force = false){
+		if(!file_exists($destination) || $force){
+			$this->output->write('Creating file: '.$destination.' ... ');
+			$output = file_get_contents($source);
+			foreach ($dictionary as $key=>$value) {
+				$output = str_replace('{{'.$key.'}}', $value, $output);
+			}
+			file_put_contents($destination, $output);
+			$this->output->writeln('DONE');
+		}
+	}
+
+	protected function updateFields($database, $table, $destination){
+		$this->output->write('Updating fields ... ');
+		$access = new Access(Env::get($database));
+
+		$fields = include($destination);
+		$modifiers = [];
+		foreach ($fields as $field=>$rest){
+			$fieldname = trim($field, '@!');
+			$modifiers[$fieldname] = '';
+			if(strpos($field, '@') !== false) $modifiers[$fieldname] .= '@';
+			if(strpos($field, '!') !== false) $modifiers[$fieldname] .= '!';
+		}
+
+		$encoder = new \Riimu\Kit\PHPEncoder\PHPEncoder();
+
+		$output = '<?php return ['."\n";
+		foreach ($access->getFieldData($table) as $db_field) {
+			$label = $modifiers[$db_field['Field']].$db_field['Field'];
+			$type = $this->selectRedfoxField($db_field['Type'], $db_field['Field']).'::class';
+			$output .= "\t'$label' => [$type";
+			$options = $access->getEnumValues($table, $db_field['Field']);
+			if(count($options)) $output .= ', '.$encoder->encode($options, ['array.inline' => true]);
+			$output.="],\n";
+		}
+		$output.="];";
+
+		file_put_contents($destination, $output);
+
+		$this->output->writeln('DONE.');
+	}
+
+
+	protected function selectRedfoxField($dbtype, $fieldName){
+		if($dbtype == 'tinyint(1)') return '\Phlex\RedFox\Fields\BoolField';
+		if($dbtype == 'date') return '\Phlex\RedFox\Fields\DateField';
+		if($dbtype == 'datetime') return '\Phlex\RedFox\Fields\DateTimeField';
+		if($dbtype == 'float') return '\Phlex\RedFox\Fields\FloatField';
+
+		if(strpos($dbtype, 'int(11) unsigned')===0 && (substr($fieldName, -2) == 'Id' || $fieldName == 'id')) return '\Phlex\RedFox\Fields\IdField';
+		if(strpos($dbtype, 'int')===0) return '\Phlex\RedFox\Fields\IntegerField';
+		if(strpos($dbtype, 'tinyint')===0) return '\Phlex\RedFox\Fields\IntegerField';
+		if(strpos($dbtype, 'smallint')===0) return '\Phlex\RedFox\Fields\IntegerField';
+		if(strpos($dbtype, 'mediumint')===0) return '\Phlex\RedFox\Fields\IntegerField';
+		if(strpos($dbtype, 'bigint')===0) return '\Phlex\RedFox\Fields\IntegerField';
+
+		if(strpos($dbtype, 'varchar')===0) return '\Phlex\RedFox\Fields\StringField';
+		if(strpos($dbtype, 'char')===0) return '\Phlex\RedFox\Fields\StringField';
+		if(strpos($dbtype, 'text')===0) return '\Phlex\RedFox\Fields\StringField';
+		if(strpos($dbtype, 'text')===0) return '\Phlex\RedFox\Fields\StringField';
+		if(strpos($dbtype, 'tinytext')===0) return '\Phlex\RedFox\Fields\StringField';
+		if(strpos($dbtype, 'mediumtext')===0) return '\Phlex\RedFox\Fields\StringField';
+		if(strpos($dbtype, 'longtext')===0) return '\Phlex\RedFox\Fields\StringField';
+
+		if(strpos($dbtype, 'set')===0) return '\Phlex\RedFox\Fields\SetField';
+		if(strpos($dbtype, 'enum')===0) return '\Phlex\RedFox\Fields\EnumField';
+
+		return '\Phlex\RedFox\Fields\UnsupportedField';
 	}
 
 }

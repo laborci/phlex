@@ -22,8 +22,8 @@ class UpdateEntities extends Command {
 			if (is_dir($folder)) {
 				$name = basename($folder);
 				$style->section($name);
-				$command = $this->getApplication()->find('px:update-entity');
-				$updateInput = new ArrayInput(['command' => 'px:update-entity', 'name' => $name]);
+				$command = $this->getApplication()->find('px:create-entity');
+				$updateInput = new ArrayInput(['command' => 'px:create-entity', 'name' => $name]);
 				$command->run($updateInput, $output);
 				$style->writeln('');
 			}

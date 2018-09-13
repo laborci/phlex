@@ -1,5 +1,6 @@
 <?php namespace Phlex\Codex\Responder;
 
+use App\ServiceManager;
 use App\Site\Admin\Service\Admin\AdminDescriptor;
 use App\Site\Website\Form\FormRenderer\FormRenderer;
 use App\Site\Website\Form\UserForm;
@@ -48,6 +49,7 @@ class FormResponder extends JsonResponder {
 			$result = $formDataManager->save($id, $data);
 		} catch (\Throwable $exception) {
 			$this->getResponse()->setStatusCode(422);
+			ServiceManager::getLogger()->info($exception->getMessage());
 			$this->response->addMessage('Hiba történt a mentés közben. Ellenőrizd az adatokat!');
 			return;
 		}
