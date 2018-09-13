@@ -107,5 +107,8 @@ abstract class Model {
 	public function isAttachmentGroupExists($name){ return array_key_exists($name, $this->attachmentGroups); }
 	public function getAttachmentManager($name, $object){ return new AttachmentManager($object, $this->attachmentGroups[$name]); }
 	public function getAttachmentGroups(){return array_keys($this->attachmentGroups);}
+
+
+	public function __get($name):\Phlex\Codex\Field { return $this->getField($name); }
 }
 

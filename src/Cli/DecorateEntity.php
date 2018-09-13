@@ -23,10 +23,16 @@ class DecorateEntity extends Command{
 		$style = new SymfonyStyle($input, $output);
 
 		$name = ucfirst($input->getArgument('name'));
-		$class = "\\App\\Entity\\".$name."\\".$name;
 
 		$style->write('Decorating entity ... ');
+		$this->decorateEntity($name);
+		$style->writeln('done.');
 
+		exit(0);
+	}
+
+	protected function decorateEntity($name){
+		$class = "\\App\\Entity\\".$name."\\".$name;
 		/** @var \Phlex\RedFox\Repository $repository */
 		$repository = $class::repository();
 		/** @var \Phlex\RedFox\Model $model */
@@ -47,8 +53,8 @@ class DecorateEntity extends Command{
 		$lines = array_values($lines);
 
 		$generatedLines = [
-		" * px: @method static \\App\\Entity\\".$name."\\".$name."Repository repository()",
-		" * px: @method static \\App\\Entity\\".$name."\\".$name."Model model()"
+			" * px: @method static \\App\\Entity\\".$name."\\".$name."Repository repository()",
+			" * px: @method static \\App\\Entity\\".$name."\\".$name."Model model()"
 		];
 
 		/** @var \Phlex\RedFox\Model $model */
@@ -81,10 +87,6 @@ class DecorateEntity extends Command{
 		$source = str_replace($doc, $newBlock, $source);
 
 		file_put_contents($ref->getFileName(), $source);
-		$style->writeln('done.');
-
-		exit(0);
 	}
-
 
 }

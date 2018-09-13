@@ -77,10 +77,10 @@ class FormDataManager {
 			$field = $model->getField($name);
 			switch (get_class($field)){
 				case DateTimeField::class:
-					$data[$name] = is_null($item->$name) || is_bool($item->$name) ? null : $item->$name->format('Y-m-d\TH:i');
+					$data[$name] = (is_null($item->$name) || is_bool($item->$name) || $item->$name === '') ? null : $item->$name->format('Y-m-d\TH:i');
 					break;
 				case DateField::class:
-					$data[$name] = is_null($item->$name) || is_bool($item->$name) ? null : $item->$name->format('Y-m-d');
+					$data[$name] = (is_null($item->$name) || is_bool($item->$name) || $item->$name === '') ? null : $item->$name->format('Y-m-d');
 					break;
 				case PasswordField::class:
 					$data[$name] = null;
@@ -102,10 +102,10 @@ class FormDataManager {
 
 				switch (get_class($model->getField($key))){
 					case DateTimeField::class:
-						$item->$key = is_null($item->$key) ? null :  new \DateTime($data[$key]);
+						$item->$key = (is_null($data[$key]) || is_bool($data[$key]) ||  $data[$key] === '') ? null :  new \DateTime($data[$key]);
 						break;
 					case DateField::class:
-						$item->$key = is_null($item->$key) ? null : new \DateTime($data[$key]);
+						$item->$key = (is_null($data[$key]) || is_bool($data[$key]) ||  $data[$key] === '') ? null : new \DateTime($data[$key]);
 						break;
 					case PasswordField::class:
 						if(!is_null($data[$key])) $item->$key = $data[$key];

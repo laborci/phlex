@@ -8,15 +8,19 @@ abstract class Environment {
 
 	protected function __construct() {
 		$root = getenv('ROOT');
-		$cfg = getenv('PXCONFIG');
 
-		if(!$root){
+		if (!$root) {
 			throw new \Exception('ROOT env is not set');
 		}
 
 		$this->setPaths();
-		if(!$cfg) $cfg = 'config.php';
-		$this->config = array_merge($this->config, include $root.'/config/'.$cfg);
+
+		$config = getenv('PXCONFIG');
+		if (!$config) $config = ['config.php'];
+		else $config = explode(',', $config);
+		foreach ($config as $configFile) {
+			$this->config = array_merge($this->config, include $root . '/config/' . $configFile);
+		}
 	}
 
 	protected function initialize(){
@@ -45,6 +49,10 @@ abstract class Environment {
 		static::$instance->initialize();
 	}
 
+	public function loadConfig($file){
+
+	}
+
 	/**
 	 * @param string|null $name
 	 *
@@ -59,5 +67,8 @@ abstract class Environment {
 		return static::$instance->config[$name];
 	}
 
+	public static function set($key, $value){
+		static::$instance->config[$key] = $value;
+	}
 
 }
