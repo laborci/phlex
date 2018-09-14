@@ -76,8 +76,8 @@ class Finder {
 	 *
 	 * @return array
 	 */
-	public function collect($limit = null, $offset = null) {
-		$data = $this->collectData($limit, $offset);
+	public function collect($limit = null, $offset = null, &$count = null) {
+		$data = $this->collectData($limit, $offset,$count);
 		if($converter = $this->converter) {
 			$data = array_map($converter, $data);
 		}
@@ -95,8 +95,10 @@ class Finder {
 		} else return null;
 	}
 
-	public function collectData($limit = null, $offset = null):array {
-		$sql = $this->getSql();
+	public function collectData($limit = null, $offset = null, &$count = null):array {
+		$doCounting = !is_null($limit);
+
+		$sql = $this->getSql($doCounting);
 		if (!is_null($limit)) {
 			$sql .= ' LIMIT ' . $limit;
 			if (!is_null($offset))
@@ -107,6 +109,7 @@ class Finder {
 		} else {
 			return $this->access->getRows($sql);
 		}
+		if($doCounting) $count = $this->access->getFoundRows();
 	}
 
 	public function collectPage($pageSize, $page, &$count = 0):array {
@@ -118,18 +121,18 @@ class Finder {
 	public function collectPageData($pageSize, $page, &$count = 0):array {
 		$pageSize = abs(intval($pageSize));
 		$page = abs(intval($page));
-		$count = $this->count();
-		if(!$count) return array();
-		$pages = ceil($count / $pageSize);
-
-		if($page > $pages) $page = $pages;
-
-		return $this->collectData($pageSize, $pageSize * ($page - 1));
+		//$count = $this->count();
+		//if(!$count) return array();
+		$data = $this->collectData($pageSize, $pageSize * ($page - 1));
+		$count = $this->access->getFoundRows();
+//		$pages = ceil($count / $pageSize);
+//		if($page > $pages) $page = $pages;
+		return $data;
 	}
 
-	public function getSql():string {
+	public function getSql($count = false):string {
 		return
-			'SELECT ' .
+			'SELECT ' . ($count ? 'SQL_CALC_FOUND_ROWS ' : '') .
 			((!is_null($this->key)) ? ($this->access->escapeSQLEntity($this->key).', ') : ('')) .
 			$this->select . ' ' .
 			'FROM ' . $this->from . ' ' .
@@ -137,10 +140,14 @@ class Finder {
 			((count($this->order)) ? (' ORDER BY ' . join(', ', $this->order)) : (''));
 	}
 
+	public function getCountSql(){
+		return 'SELECT Count(1) FROM ' . $this->from . ' ' .( $this->where != null ? ' WHERE '.$this->where->getSql($this->access).' ' : '');
+	}
+
 	public function count():int {
-		$sql = $this->getSql();
-		$sql = preg_replace('/^\s*SELECT(.+?)FROM/', 'SELECT COUNT(1) FROM', $sql);
-		$sql = explode('ORDER BY', $sql);
-		return $this->access->getValue($sql[0]);
+		return $this->access->getValue($this->getCountSql());
+		//$sql = preg_replace('/^\s*SELECT(.+?)FROM/', 'SELECT COUNT(1) FROM', $sql);
+		//$sql = explode('ORDER BY', $sql);
+		//return $this->access->getValue($sql[0]);
 	}
 }

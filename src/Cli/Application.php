@@ -17,9 +17,7 @@ abstract class Application extends \Symfony\Component\Console\Application {
 		$application = new static();
 
 		$application->add(new CreateEntity());
-		$application->add(new UpdateEntity());
 		$application->add(new UpdateEntities());
-		$application->add(new DecorateEntity());
 		$application->add(new Configure());
 		$application->add(new GetEnv());
 

@@ -40,6 +40,10 @@ class Access {
 		return $this->connection->query($sql);
 	}
 
+	public function getFoundRows(){
+		return $this->getValue('SELECT FOUND_ROWS()');
+	}
+
 	public function query(string $sql, ...$sqlParams) { return $this->execute($sql, ...$sqlParams); }
 
 	public function getValue(string $sql, ...$sqlParams) { $row = $this->getRow($sql, ...$sqlParams); return $row ? reset($row) : null; }

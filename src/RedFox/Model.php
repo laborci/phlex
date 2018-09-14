@@ -51,11 +51,13 @@ abstract class Model {
 
 			$this->fields[$fieldName] = $field;
 		}
+		$this->decorateFields();
 		$this->relations();
 		$this->attachments();
 	}
 
-	public function setDefaults($object){}
+	protected function decorateFields(){}
+	//public function setDefaults(Entity $object){}
 
 	abstract public function fields():array;
 	abstract protected function relations();
@@ -109,6 +111,6 @@ abstract class Model {
 	public function getAttachmentGroups(){return array_keys($this->attachmentGroups);}
 
 
-	public function __get($name):\Phlex\Codex\Field { return $this->getField($name); }
+	public function __get($name):\Phlex\RedFox\Field { return $this->getField($name); }
 }
 

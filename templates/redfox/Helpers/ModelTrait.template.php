@@ -3,6 +3,6 @@
 {{fields}}
  */
 trait ModelTrait{
-	public function repository(){ return $this->repositoryFactory('{{table}}', '{{database}}'); }
+	public function repository(){ return $this->repositoryFactory(...(include('source.php'))); }
 	public function fields():array { return include("fields.php"); }
 }
