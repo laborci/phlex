@@ -1,6 +1,7 @@
 <?php namespace Phlex\RedFox\Attachment;
 
 use App\Env;
+use App\ServiceManager;
 use Phlex\RedFox\Entity;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -71,9 +72,10 @@ class AttachmentManager {
 	public function __construct(Entity $owner, AttachmentDescriptor $descriptor) {
 		$this->owner = $owner;
 		$this->descriptor = $descriptor;
-		$this->path = Env::get('path_files') . $descriptor->getEntityShortName() . '/' . $owner->id . '/' . $descriptor->getName() . '/';
-		$this->pathId = $descriptor->getEntityShortName() . '-' . $owner->id . '-' . $descriptor->getName();
-		$this->urlBase = Env::get('url_files') . $descriptor->getEntityShortName() . '/' . $owner->id . '/' . $descriptor->getName() . '/';
+		$ownerId = $owner->id ? $owner->id : '0';
+		$this->path = Env::get('path_files') . $descriptor->getEntityShortName() . '/' . $ownerId . '/' . $descriptor->getName() . '/';
+		$this->pathId = $descriptor->getEntityShortName() . '-' . $ownerId. '-' . $descriptor->getName();
+		$this->urlBase = Env::get('url_files') . $descriptor->getEntityShortName() . '/' . $ownerId . '/' . $descriptor->getName() . '/';
 		if (!is_dir($this->path)) {
 			mkdir($this->path, 0777, true);
 		}

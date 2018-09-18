@@ -27,27 +27,49 @@ class Finder {
 		$this->converter = $converter;
 	}
 
-	public function setConverter(\Closure $converter = null):Finder{
+	/**
+	 * @param \Closure|null $converter
+	 * @return static
+	 */
+	public function setConverter(\Closure $converter = null):self{
 		$this->converter = $converter;
 		return $this;
 	}
 
-	public function key(string $key):Finder  {
+	/**
+	 * @param string $key
+	 * @return static
+	 */
+	public function key(string $key):self  {
 		$this->key = $key;
 		return $this;
 	}
 
-	public function select(string $sql, ...$sqlParams):Finder  {
+	/**
+	 * @param string $sql
+	 * @param mixed ...$sqlParams
+	 * @return static
+	 */
+	public function select(string $sql, ...$sqlParams):self  {
 		$this->select = $this->access->buildSQL($sql . ' ', $sqlParams);
 		return $this;
 	}
 
-	public function from(string $sql, ...$sqlParams):Finder  {
+	/**
+	 * @param string $sql
+	 * @param mixed ...$sqlParams
+	 * @return static
+	 */
+	public function from(string $sql, ...$sqlParams):self  {
 		$this->from = $this->access->buildSQL($sql . ' ', $sqlParams);
 		return $this;
 	}
 
-	public function where(Filter $filter = null):Finder  {
+	/**
+	 * @param Filter|null $filter
+	 * @return static
+	 */
+	public function where(Filter $filter = null):self  {
 		if(!is_null($filter)) {
 			$this->where = $filter;
 		}
@@ -56,17 +78,45 @@ class Finder {
 
 	#region order
 
-	function order($order):Finder {
+	/**
+	 * @param $order
+	 * @return static
+	 */
+	function order($order):self {
 		if(is_array($order)) foreach($order as $field => $dir) $this->order[] = $this->access->escapeSQLEntity($field).' '.$dir;
 		else $this->order[] = $order;
 		return $this;
 	}
 
-	function asc($field):Finder { return $this->order($this->access->escapeSQLEntity($field) . ' ASC'); }
-	function desc($field):Finder { return $this->order($this->access->escapeSQLEntity($field) . ' DESC'); }
-	function ascIf(bool $cond, string $field):Finder { return $cond ? $this->asc($field) : $this; }
-	function descIf(bool $cond, string $field):Finder { return $cond ? $this->desc($field) : $this; }
-	function orderIf(bool $cond, $order):Finder { return $cond ? $this->order($order) : $this; }
+	/**
+	 * @param $field
+	 * @return static
+	 */
+	function asc($field):self { return $this->order($this->access->escapeSQLEntity($field) . ' ASC'); }
+
+	/**
+	 * @param $field
+	 * @return static
+	 */
+	function desc($field):self { return $this->order($this->access->escapeSQLEntity($field) . ' DESC'); }
+	/**
+	 * @param bool $cond
+	 * @param string $field
+	 * @return static
+	 */
+	function ascIf(bool $cond, string $field):self { return $cond ? $this->asc($field) : $this; }
+	/**
+	 * @param bool $cond
+	 * @param string $field
+	 * @return static
+	 */
+	function descIf(bool $cond, string $field):self { return $cond ? $this->desc($field) : $this; }
+	/**
+	 * @param bool $cond
+	 * @param $order
+	 * @return static
+	 */
+	function orderIf(bool $cond, $order):self { return $cond ? $this->order($order) : $this; }
 
 	#endregion
 
@@ -85,7 +135,8 @@ class Finder {
 	}
 
 	public function pick() {
-		$data = $this->collectData(1);
+		$false = false;
+		$data = $this->collectData(1, null, $false);
 		if($data) {
 			$data = array_shift($data);
 			if($converter = $this->converter){
@@ -96,7 +147,7 @@ class Finder {
 	}
 
 	public function collectData($limit = null, $offset = null, &$count = null):array {
-		$doCounting = !is_null($limit);
+		$doCounting = !is_null($limit) && $count!==false;
 
 		$sql = $this->getSql($doCounting);
 		if (!is_null($limit)) {

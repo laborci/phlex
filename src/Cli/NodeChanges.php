@@ -27,6 +27,7 @@ class NodeChanges extends Command {
 				}else{
 					$style->success(basename($folder));
 				}
+				$output = '';
 			}
 		}
 
