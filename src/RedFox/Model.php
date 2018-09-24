@@ -57,7 +57,7 @@ abstract class Model {
 	}
 
 	protected function decorateFields(){}
-	//public function setDefaults(Entity $object){}
+	//abstract function setDefaults(self $object);
 
 	abstract public function fields():array;
 	abstract protected function relations();
