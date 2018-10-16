@@ -214,6 +214,7 @@ class CreateEntity extends Command {
 
 		if ($dbtype == 'tinyint(1)') return '\Phlex\RedFox\Fields\BoolField';
 		if ($dbtype == 'date') return '\Phlex\RedFox\Fields\DateField';
+		if ($dbtype == 'time') return '\Phlex\RedFox\Fields\TimeField';
 		if ($dbtype == 'datetime') return '\Phlex\RedFox\Fields\DateTimeField';
 		if ($dbtype == 'float') return '\Phlex\RedFox\Fields\FloatField';
 

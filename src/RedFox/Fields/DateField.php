@@ -11,7 +11,7 @@ class DateField extends Field {
 	 * @param \DateTime $value
 	 * @return string
 	 */
-	public function export($value) { return return is_null($value) ? null : $value->format('Y-m-d'); }
+	public function export($value) { return is_null($value) ? null : $value->format('Y-m-d'); }
 
 	public function set($value) {
 		if (is_string($value)) {
