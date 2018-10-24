@@ -1,5 +1,6 @@
 <?php namespace Phlex\Session;
 
+use App\ServiceManager;
 use Phlex\Sys\ServiceManager\SharedService;
 
 abstract class Container implements SharedService {
@@ -36,7 +37,7 @@ abstract class Container implements SharedService {
 
 	private function getFields(){
 		$fields = [];
-		$properties = (new \ReflectionClass($this))->getProperties(\ReflectionProperty::IS_PUBLIC + \ReflectionProperty::IS_PROTECTED);
+		$properties = (new \ReflectionClass($this))->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED);
 		foreach($properties as $property){
 			$fields[] = $property->name;
 		}

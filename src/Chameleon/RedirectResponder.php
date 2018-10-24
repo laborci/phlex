@@ -15,7 +15,7 @@ abstract class RedirectResponder extends Responder {
 		}
 		/** @var RedirectResponse $response */
 		$response = $this->getResponse();
-		$response->setTargetUrl( $this->redirect() )->send();
+		$response->setTargetUrl( $this->redirect($response) )->send();
 	}
 
 	/**
