@@ -36,10 +36,10 @@ class Access {
 
 	private function execute($sql, ...$sqlParams) {
 		$sql = $this->buildSQL($sql, $sqlParams);
-		$time = microtime();
+		$time = microtime(true);
 		if(!is_null($this->logger)) $this->logger->sql($sql, debug_backtrace()[1]['function']);
 		$return = $this->connection->query($sql);
-		if(!is_null($this->logger)) $this->logger->info(microtime()-$time);
+		if(!is_null($this->logger)) $this->logger->info('query takes '.(microtime(true)-$time) . 'seconds');
 		return $return;
 	}
 
