@@ -21,6 +21,7 @@ abstract class Application extends \Symfony\Component\Console\Application {
 		$application->add(new Configure());
 		$application->add(new GetEnv());
 		$application->add(new NodeChanges());
+		$application->add(new Clientversion());
 
 		$commands = static::getCommands($application);
 

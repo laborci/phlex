@@ -41,6 +41,7 @@ abstract class Environment {
 		$this->config['path_sessions'] = $this->config['path_var'] . 'sessions/';
 		$this->config['url_thumbnails'] = '/thumbnails/';
 		$this->config['url_files'] = '/files/';
+		$this->config['clientversion'] = file_get_contents($this->config['path_var'].'clientversion');
 	}
 
 	// Behind static facade

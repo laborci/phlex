@@ -2,6 +2,7 @@
 
 namespace Phlex\Chameleon;
 
+use App\Env;
 use App\ServiceManager;
 use Phlex\Chameleon\SmartPageResponder;
 use zpt\anno\Annotations;
@@ -38,7 +39,7 @@ abstract class HandyResponder extends SmartPageResponder {
 		if (array_key_exists('css', $this->classAnnotations)) {
 			if (!is_array($this->classAnnotations['css'])) $this->classAnnotations['css'] = [$this->classAnnotations['css']];
 			foreach($this->classAnnotations['css'] as $css){
-				echo '<link rel="stylesheet" type="text/css" href="'.$this->distFolder().$css.'.css" />'."\n";
+				echo '<link rel="stylesheet" type="text/css" href="'.$this->distFolder().$css.'.css?'.Env::get('clientversion').'" />'."\n";
 			}
 		}
 	}
@@ -47,12 +48,12 @@ abstract class HandyResponder extends SmartPageResponder {
 		if (array_key_exists('js', $this->classAnnotations)) {
 			if (!is_array($this->classAnnotations['js'])) $this->classAnnotations['js'] = [$this->classAnnotations['js']];
 			foreach($this->classAnnotations['js'] as $js){
-				echo '<script src="'.$this->distFolder().$js.'"></script>'."\n";
+				echo '<script src="'.$this->distFolder().$js.'?'.Env::get('clientversion').'"></script>'."\n";
 			}
 		}
 		if (array_key_exists('jsappmodule', $this->classAnnotations)) {
 			if (!is_array($this->classAnnotations['jsappmodule'])) $this->classAnnotations['jsappmodule'] = [$this->classAnnotations['jsappmodule']];
-			echo '<script src="'.$this->distFolder().'app.js" modules="'.join(' ', $this->classAnnotations['jsappmodule']).'"></script>'."\n";
+			echo '<script src="'.$this->distFolder().'app.js?'.Env::get('clientversion').'" modules="'.join(' ', $this->classAnnotations['jsappmodule']).'"></script>'."\n";
 		}
 	}
 }
