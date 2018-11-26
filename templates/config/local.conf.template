@@ -5,9 +5,23 @@
 	DocumentRoot "{{path}}/public/"
 	ErrorLog {{path}}/var/log/error.log
 
-    # You sholud allow overrides in this directory, or put content of .htaccess file here
     <Directory {{path}}/public>
         AllowOverride All
+        Require All Granted
+
+        php_flag session.cookie_httponly on
+        php_flag log_errors on
+        php_flag display_errors off
+        php_value error_reporting 2147483647
+        php_value error_log {{path}}/var/log/app.log
+
+        Options -Indexes
+        Options +FollowSymlinks
+
+        RewriteEngine On
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_URI} !^/?(\!?(files|img|css|js))/?(.*)
+        RewriteRule . /index.php [L]
     </Directory>
 
 </VirtualHost>
